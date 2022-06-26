@@ -14,7 +14,8 @@ function App() {
   }
 
   return (
-    <div
+    <div 
+      css={css`width: 100%; height: 100%;`}
       onTouchStart={setCoordinatesByTouchEvent}
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={() => setTouchCoordinates({ x: 0, y: -100 })}
@@ -55,12 +56,15 @@ function App() {
 }
 
 const sheetWrapper = css`
-  height: 70vh;
+  margin-top: 1%;
+  height: 69%;
   touch-action: none;
 `
 
 const controlWrapper = css`
-  height: 30vh;
+  position: relative;
+  z-index: 101;
+  height: 30%;
   background-color: aqua;
 `
 
