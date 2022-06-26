@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import Bar from "./Bar";
 
@@ -47,6 +47,7 @@ function App() {
       </div>
 
       <div css={controlWrapper}>
+        {selectedNote}
       </div>
 
     </div>
