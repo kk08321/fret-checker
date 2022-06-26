@@ -20,7 +20,6 @@ function SheetPage() {
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={() => setTouchCoordinates({ x: 0, y: -100 })}
     >
-      <div css={css`height: 1%;`}></div>
       <div css={sheetWrapper}>
         <Bar note="23" onSelected={setSelectedNote} coordinates={touchCoordinates} wrapperCss={blackBarWrapperCss} barCss={blackShortBarCss} />
         <Bar note="22" onSelected={setSelectedNote} coordinates={touchCoordinates} wrapperCss={whiteBarWrapperCss} barCss={whiteBarCss} />
@@ -57,7 +56,8 @@ function SheetPage() {
 }
 
 const sheetWrapper = css`
-  height: 69%;
+  height: 68%;
+  padding: 2% 0;
   touch-action: none;
 `
 
@@ -104,7 +104,7 @@ const blackShortBarCss = css`
   ${barCss};
   background-color: black;
   width: 25%;
-  left: 60%;
+  left: 70%;
 `
 
 const whiteBarCss = css`
