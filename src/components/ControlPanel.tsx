@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { useRef, useEffect } from "react";
-import { controlWrapper, iconContainer, icon, messageWrapper, fretLabel } from "../styles/sheetPageStyles";
+import { controlWrapper, iconContainer, messageWrapper, fretLabel } from "../styles/sheetPageStyles";
 
 interface ControlPanelProps {
   notes: string[];
