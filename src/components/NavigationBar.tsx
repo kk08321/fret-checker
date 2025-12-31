@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { Link } from "react-router-dom";
+import React from "react";
 
 interface NavItem {
   path: string;
@@ -109,29 +110,32 @@ export const NavigationBar = () => {
         z-index: 1000;
       `}
     >
-      {navItems.map((item) => (
-        <Link
-          key={item.path}
-          to={item.path}
-          css={css`
-            width: 33.33%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-decoration: none;
-            font-size: 18px;
-            gap: 4px;
-            &:hover {
-              background-color: #444;
-            }
-          `}
-        >
-          {item.icon}
-          <span style={{ fontSize: "12px" }}>{item.label}</span>
-        </Link>
-      ))}
+      {navItems.map((item) => {
+        const LinkComponent = Link as React.ElementType;
+        return (
+          <LinkComponent
+            key={item.path}
+            to={item.path}
+            css={css`
+              width: 33.33%;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              text-decoration: none;
+              font-size: 18px;
+              gap: 4px;
+              &:hover {
+                background-color: #444;
+              }
+            `}
+          >
+            {item.icon}
+            <span style={{ fontSize: "12px" }}>{item.label}</span>
+          </LinkComponent>
+        );
+      })}
     </div>
   );
 };
