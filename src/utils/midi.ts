@@ -64,25 +64,68 @@ export const getGuitarPositions = (midi: number): Array<{ string: number; fret: 
 
 // 音符番号をギター押弦箇所の文字列に変換
 export const convertNoteToGuitarPositions = (noteNumStr: string): string => {
-  // シャープ記号が付いているかチェック
+  // シャープ記号とフラット記号が付いているかチェック
   const isSharp = noteNumStr.endsWith('#');
-  const noteNumWithoutSharp = isSharp ? noteNumStr.slice(0, -1) : noteNumStr;
-  const noteNum = parseInt(noteNumWithoutSharp, 10);
+  const isFlat = noteNumStr.endsWith('b');
+  const noteNumWithoutAccidental = isSharp || isFlat ? noteNumStr.slice(0, -1) : noteNumStr;
+  const noteNum = parseInt(noteNumWithoutAccidental, 10);
   if (isNaN(noteNum)) {
     return noteNumStr;
   }
 
   const baseMidi = noteNumberToMidi(noteNum);
-  // シャープが付いている場合はMIDIノート番号を+1
-  const midi = isSharp ? baseMidi + 1 : baseMidi;
-  const { japaneseName, noteName, octave } = midiToNoteName(midi);
+  // 押弦位置の計算にはシャープ/フラット後のMIDIノート番号を使用
+  const midi = isSharp ? baseMidi + 1 : (isFlat ? baseMidi - 1 : baseMidi);
+  
+  // 表示名を取得
+  let displayJapaneseName: string;
+  let displayNoteName: string;
+  let octave: number;
+  
+  if (isSharp) {
+    // シャープの場合
+    const { japaneseName, noteName, octave: oct } = midiToNoteName(baseMidi);
+    displayJapaneseName = `${japaneseName}♯`;
+    displayNoteName = `${noteName}#`;
+    octave = oct;
+  } else if (isFlat) {
+    // フラットの場合：元のMIDIノート番号から音名を取得してフラット記号を付ける
+    const { japaneseName, noteName, octave: oct } = midiToNoteName(baseMidi);
+    // フラット後のMIDIノート番号から音名を取得（変換用）
+    const flatNoteInfo = midiToNoteName(midi);
+    
+    // フラット後の音名がシャープ記号を含む場合（例：D# → E♭）は変換する
+    if (flatNoteInfo.noteName.includes('#')) {
+      // シャープ表記をフラット表記に変換
+      const flatNoteNames: { [key: string]: string } = {
+        'C#': 'D♭', 'D#': 'E♭', 'F#': 'G♭', 'G#': 'A♭', 'A#': 'B♭'
+      };
+      const flatJapaneseNames: { [key: string]: string } = {
+        'ド#': 'レ♭', 'レ#': 'ミ♭', 'ﾌｧ#': 'ソ♭', 'ソ#': 'ラ♭', 'ラ#': 'シ♭'
+      };
+      displayNoteName = flatNoteNames[flatNoteInfo.noteName] || noteName;
+      displayJapaneseName = flatJapaneseNames[flatNoteInfo.japaneseName] || japaneseName;
+    } else {
+      // 元の音名にフラット記号を付ける（例：F → F♭、E → E♭）
+      displayNoteName = `${noteName}♭`;
+      displayJapaneseName = `${japaneseName}♭`;
+    }
+    octave = oct;
+  } else {
+    // 通常の場合
+    const { japaneseName, noteName, octave: oct } = midiToNoteName(baseMidi);
+    displayJapaneseName = japaneseName;
+    displayNoteName = noteName;
+    octave = oct;
+  }
+  
   const positions = getGuitarPositions(midi);
 
   if (positions.length === 0) {
-    return `${japaneseName} ${noteName}${octave} (押弦不可)`;
+    return `${displayJapaneseName} ${displayNoteName}${octave} (押弦不可)`;
   }
 
   const positionStrings = positions.map(pos => `${pos.string}弦${pos.fret}F`);
-  return `${japaneseName} ${noteName}${octave} ${positionStrings.join(' or ')}`;
+  return `${displayJapaneseName} ${displayNoteName}${octave} ${positionStrings.join(' or ')}`;
 };
 

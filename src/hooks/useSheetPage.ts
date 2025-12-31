@@ -12,6 +12,7 @@ export const useSheetPage = () => {
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
   const [isSharpMode, setIsSharpMode] = useState(false);
+  const [isFlatMode, setIsFlatMode] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   
   // inputtedNoteNumbersから動的にnotesを計算
@@ -44,8 +45,9 @@ export const useSheetPage = () => {
         touchCoordinates.y >= controlRect.top &&
         touchCoordinates.y <= controlRect.bottom
       ) {
-        // ControlPanelの範囲内の場合はnote入力をスキップし、シャープモードをリセット
+        // ControlPanelの範囲内の場合はnote入力をスキップし、シャープモードとフラットモードをリセット
         setIsSharpMode(false);
+        setIsFlatMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -64,8 +66,9 @@ export const useSheetPage = () => {
         touchCoordinates.y < barTop ||
         touchCoordinates.y > barBottom
       ) {
-        // Barの範囲外の場合はnote入力をスキップし、シャープモードをリセット
+        // Barの範囲外の場合はnote入力をスキップし、シャープモードとフラットモードをリセット
         setIsSharpMode(false);
+        setIsFlatMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -76,10 +79,16 @@ export const useSheetPage = () => {
       noteNumbersCopy = [...inputtedNoteNumbers];
     }
     if (selectedNote !== null) {
-      const noteToAdd = isSharpMode ? `${selectedNote}#` : selectedNote;
+      let noteToAdd = selectedNote;
+      if (isSharpMode) {
+        noteToAdd = `${selectedNote}#`;
+      } else if (isFlatMode) {
+        noteToAdd = `${selectedNote}b`;
+      }
       noteNumbersCopy.push(noteToAdd);
-      // シャープモードをリセット
+      // シャープモードとフラットモードをリセット
       setIsSharpMode(false);
+      setIsFlatMode(false);
     }
     // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
@@ -102,6 +111,8 @@ export const useSheetPage = () => {
     onEnter,
     isSharpMode,
     setIsSharpMode,
+    isFlatMode,
+    setIsFlatMode,
   };
 };
 

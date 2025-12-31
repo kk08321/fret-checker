@@ -9,6 +9,9 @@ interface ControlPanelProps {
   onClearSelection?: () => void;
   onUndo?: () => void;
   onSharpModeStart?: (enabled: boolean) => void;
+  isSharpMode?: boolean;
+  onFlatModeStart?: (enabled: boolean) => void;
+  isFlatMode?: boolean;
 }
 
 const clearIconButton = css`
@@ -44,6 +47,7 @@ const sharpIconButton = css`
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
   
   svg {
     width: 28px;
@@ -55,6 +59,44 @@ const sharpIconButton = css`
     background-color: #666;
     transform: scale(0.95);
   }
+`;
+
+const sharpIconButtonActive = css`
+  background-color: #4a90e2;
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+  transform: scale(1.1);
+  border: 2px solid #2e5c8a;
+`;
+
+const flatIconButton = css`
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #888;
+  margin: 10px auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+  }
+  
+  &:active {
+    background-color: #666;
+    transform: scale(0.95);
+  }
+`;
+
+const flatIconButtonActive = css`
+  background-color: #4a90e2;
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+  transform: scale(1.1);
+  border: 2px solid #2e5c8a;
 `;
 
 const undoIconButton = css`
@@ -80,7 +122,7 @@ const undoIconButton = css`
   }
 `;
 
-function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart }: ControlPanelProps) {
+function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false }: ControlPanelProps) {
   const handleClearClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -94,6 +136,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
   };
 
   const sharpIconRef = useRef<HTMLDivElement>(null);
+  const flatIconRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sharpIconElement = sharpIconRef.current;
@@ -111,14 +154,34 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
     };
   }, [onSharpModeStart]);
 
+  useEffect(() => {
+    const flatIconElement = flatIconRef.current;
+    if (!flatIconElement) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      onFlatModeStart?.(true);
+    };
+
+    flatIconElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+    return () => {
+      flatIconElement.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, [onFlatModeStart]);
+
   return (
     <div css={controlWrapper} ref={controlWrapperRef}>
       <div css={iconContainer}>
         <div 
           ref={sharpIconRef}
-          css={[sharpIconButton, css`
-            touch-action: none;
-          `]}
+          css={[
+            sharpIconButton, 
+            isSharpMode && sharpIconButtonActive,
+            css`
+              touch-action: none;
+            `
+          ]}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,7 +207,38 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         </div>
       </div>
       <div css={iconContainer}>
-        <div css={icon}></div>
+        <div 
+          ref={flatIconRef}
+          css={[
+            flatIconButton, 
+            isFlatMode && flatIconButtonActive,
+            css`
+              touch-action: none;
+            `
+          ]}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 136 464"
+            css={css`
+              width: 28px;
+              height: 28px;
+            `}
+            style={{
+              filter: 'brightness(0) invert(1)'
+            }}
+          >
+            <image
+              href="/images/flat.png"
+              x="0"
+              y="0"
+              width="136"
+              height="464"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
       </div>
       <div css={iconContainer}>
         <div css={icon}></div>

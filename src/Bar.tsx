@@ -17,6 +17,7 @@ interface BarProps {
   noteNumber: number | null;
   horizontalOffset?: number;
   isSharp?: boolean;
+  isFlat?: boolean;
 }
 
 const getHighlighted = (targetRef: React.RefObject<HTMLDivElement>, coordinates: Coordinates | null): boolean => {
@@ -71,6 +72,28 @@ function Bar(props: BarProps) {
               </svg>
             </div>
           )}
+          {props.isFlat && (
+            <div css={getFlatStyle(props.horizontalOffset)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 136 464"
+                css={css`
+                  width: 100%;
+                  height: 100%;
+                `}
+              >
+                <image
+                  href="/images/flat.png"
+                  x="0"
+                  y="0"
+                  width="136"
+                  height="464"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              </svg>
+            </div>
+          )}
           <div css={getNoteEllipseStyle(props.horizontalOffset)}>
             {props.noteNumber}
           </div>
@@ -89,6 +112,19 @@ const getSharpStyle = (offset: number = 0) => css`
   left: calc(70% - 25px - 60px - 8px + ${offset}px);
   top: 50%;
   transform: translateY(-50%);
+  width: 60px;
+  height: 65px;
+  z-index: 201;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const getFlatStyle = (offset: number = 0) => css`
+  position: absolute;
+  left: calc(70% - 25px - 60px - 8px + ${offset}px);
+  top: 50%;
+  transform: translateY(-50%) translateY(-12px);
   width: 60px;
   height: 65px;
   z-index: 201;

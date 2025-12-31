@@ -25,16 +25,19 @@ function SheetPage() {
     controlWrapperRef,
     setCoordinatesByTouchEvent,
     onEnter,
+    isSharpMode,
     setIsSharpMode,
+    isFlatMode,
+    setIsFlatMode,
   } = useSheetPage();
 
   // 連続する音符のグループを検出し、各音符のオフセットを計算
   const calculateOffset = (noteNum: number): number => {
     if (inputtedNoteNumbers.length === 0) return 0;
     
-    // 入力された音符を数値に変換してソート（シャープ記号を除去してからparseInt）
+    // 入力された音符を数値に変換してソート（シャープ記号とフラット記号を除去してからparseInt）
     const inputtedNums = inputtedNoteNumbers
-      .map(n => parseInt(n.replace('#', ''), 10))
+      .map(n => parseInt(n.replace('#', '').replace('b', ''), 10))
       .filter(n => !isNaN(n))
       .sort((a, b) => a - b);
     
@@ -94,6 +97,20 @@ function SheetPage() {
     }
   };
 
+  const handleSharpModeStart = (enabled: boolean) => {
+    if (enabled) {
+      setIsFlatMode(false); // フラットモードをリセット
+    }
+    setIsSharpMode(enabled);
+  };
+
+  const handleFlatModeStart = (enabled: boolean) => {
+    if (enabled) {
+      setIsSharpMode(false); // シャープモードをリセット
+    }
+    setIsFlatMode(enabled);
+  };
+
   return (
     <div
       ref={pageWrapperRef}
@@ -104,11 +121,86 @@ function SheetPage() {
         flex-direction: column;
         padding-bottom: 60px;
         box-sizing: border-box;
+        position: relative;
       `}
       onTouchStart={setCoordinatesByTouchEvent}
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={onEnter}
     >
+      {isSharpMode && (
+        <div
+          css={css`
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(74, 144, 226, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            animation: fadeIn 0.2s ease;
+            
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+              }
+            }
+          `}
+        >
+          <span>#</span>
+          <span>シャープモード</span>
+        </div>
+      )}
+      {isFlatMode && (
+        <div
+          css={css`
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(74, 144, 226, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            animation: fadeIn 0.2s ease;
+            
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+              }
+            }
+          `}
+        >
+          <span>♭</span>
+          <span>フラットモード</span>
+        </div>
+      )}
       <div
         css={[
           sheetWrapper,
@@ -129,12 +221,14 @@ function SheetPage() {
             ? whiteBarCss 
             : (isBlackLong ? blackLongBarCss : blackShortBarCss);
           
-          // シャープ記号を除去して比較（"0#"と"0"をマッチさせるため）
-          const noteIndex = inputtedNoteNumbers.findIndex(n => n.replace('#', '') === note);
+          // シャープ記号とフラット記号を除去して比較（"0#"と"0b"と"0"をマッチさせるため）
+          const noteIndex = inputtedNoteNumbers.findIndex(n => n.replace('#', '').replace('b', '') === note);
           const isInputted = noteIndex !== -1;
           
           // シャープ付きかどうかを判定
           const isSharp = isInputted && inputtedNoteNumbers[noteIndex].includes('#');
+          // フラット付きかどうかを判定
+          const isFlat = isInputted && inputtedNoteNumbers[noteIndex].includes('b');
           
           // 連続する音符のグループを考慮してオフセットを計算
           const currentNoteNum = 23 - i;
@@ -152,6 +246,7 @@ function SheetPage() {
               noteNumber={isInputted ? noteIndex + 1 : null}
               horizontalOffset={horizontalOffset}
               isSharp={isSharp}
+              isFlat={isFlat}
             />
           );
         })}
@@ -162,7 +257,10 @@ function SheetPage() {
         controlWrapperRef={controlWrapperRef} 
         onClearSelection={handleClearSelection} 
         onUndo={handleUndo}
-        onSharpModeStart={setIsSharpMode}
+        onSharpModeStart={handleSharpModeStart}
+        isSharpMode={isSharpMode}
+        onFlatModeStart={handleFlatModeStart}
+        isFlatMode={isFlatMode}
       />
     </div>
   );
