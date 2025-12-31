@@ -3,6 +3,9 @@ import { css } from "@emotion/react";
 export const sheetWrapper = css`
   padding: 2% 0;
   touch-action: none;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  position: relative;
 `;
 
 export const iconContainer = css`
@@ -26,9 +29,12 @@ export const messageWrapper = css`
   p {
     margin: 0;
   }
-  padding-bottom: 5px;
+  padding-bottom: calc(5px + 60px);
   overflow-x: auto;
   width: 100%;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  clear: both;
 `;
 
 export const controlWrapper = css`
@@ -36,6 +42,8 @@ export const controlWrapper = css`
   position: relative;
   z-index: 101;
   background-color: #eee;
+  box-sizing: border-box;
+  clear: both;
 `;
 
 const barWrapperCss = css`
@@ -43,6 +51,8 @@ const barWrapperCss = css`
   width: 100%;
   height: 4.16666%;
   position: relative;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 `;
 
 export const blackBarWrapperCss = css`
@@ -61,8 +71,10 @@ const barCss = css`
   position: relative;
   top: 50%;
   left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  -webkit-transform: translateY(-50%) translateX(-50%);
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 `;
 
 export const blackLongBarCss = css`
@@ -89,5 +101,9 @@ export const fretLabel = css`
   float: none;
   white-space: nowrap;
   min-width: max-content;
+  display: block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 `;
 

@@ -134,6 +134,7 @@ function SheetPage() {
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
+            -webkit-transform: translateX(-50%);
             background-color: rgba(74, 144, 226, 0.9);
             color: white;
             padding: 8px 16px;
@@ -152,10 +153,12 @@ function SheetPage() {
               from {
                 opacity: 0;
                 transform: translateX(-50%) translateY(-10px);
+                -webkit-transform: translateX(-50%) translateY(-10px);
               }
               to {
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
+                -webkit-transform: translateX(-50%) translateY(0);
               }
             }
           `}
@@ -218,21 +221,28 @@ function SheetPage() {
                 css={css`
                   position: absolute;
                   left: 20px;
-                  top: 30%;
+                  top: 54%;
+                  transform: translateY(-50%);
+                  -webkit-transform: translateY(-50%);
                   height: 48%;
+                  max-height: 48%;
                   z-index: 50;
                   display: flex;
-                  align-items: flex-start;
+                  align-items: center;
                   justify-content: flex-start;
+                  box-sizing: border-box;
                 `}
               >
                 <img
                   src="/images/gcref.png"
                   alt="ト音記号"
                   css={css`
-                    width: 100%;
+                    width: auto;
                     height: 100%;
+                    max-height: 100%;
                     object-fit: contain;
+                    display: block;
+                    box-sizing: border-box;
                   `}
                 />
               </div>

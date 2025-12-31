@@ -112,25 +112,31 @@ const getSharpStyle = (offset: number = 0) => css`
   left: calc(70% - 25px - 60px - 8px + ${offset}px);
   top: 50%;
   transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
   width: 60px;
   height: 65px;
   z-index: 201;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 `;
 
 const getFlatStyle = (offset: number = 0) => css`
   position: absolute;
   left: calc(70% - 25px - 60px - 8px + ${offset}px);
   top: 50%;
-  transform: translateY(-50%) translateY(-12px);
+  transform: translateY(calc(-50% - 12px));
+  -webkit-transform: translateY(calc(-50% - 12px));
   width: 60px;
   height: 65px;
   z-index: 201;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 `;
 
 const getNoteEllipseStyle = (offset: number = 0) => css`
@@ -138,6 +144,7 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   left: calc(70% - 25px + ${offset}px);
   top: 50%;
   transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
   width: 50px;
   height: 40px;
   border-radius: 50%;
@@ -153,6 +160,10 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
     inset 0 1px 2px rgba(255, 255, 255, 0.3),
     inset 0 -1px 2px rgba(0, 0, 0, 0.2);
   z-index: 200;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 `;
 
 export default Bar;
