@@ -18,6 +18,9 @@ interface BarProps {
   horizontalOffset?: number;
   isSharp?: boolean;
   isFlat?: boolean;
+  showKeySignatureSharp?: boolean;
+  showKeySignatureFlat?: boolean;
+  keySignatureIndex?: number; // 調号記号の左からの順番（0始まり）
 }
 
 const getHighlighted = (targetRef: React.RefObject<HTMLDivElement>, coordinates: Coordinates | null): boolean => {
@@ -48,6 +51,51 @@ function Bar(props: BarProps) {
   return (
     <div css={props.wrapperCss} ref={targetRef}>
       <div css={[props.barCss, highlighted ? selected : null]}></div>
+      {/* 調号記号の表示 */}
+      {props.showKeySignatureSharp && (
+        <div css={getKeySignatureSharpStyle(props.keySignatureIndex ?? 0)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 136 464"
+            css={css`
+              width: 100%;
+              height: 100%;
+            `}
+          >
+            <image
+              href="/images/sharp.png"
+              x="0"
+              y="0"
+              width="136"
+              height="464"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
+      )}
+      {props.showKeySignatureFlat && (
+        <div css={getKeySignatureFlatStyle(props.keySignatureIndex ?? 0)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 136 464"
+            css={css`
+              width: 100%;
+              height: 100%;
+            `}
+          >
+            <image
+              href="/images/flat.png"
+              x="0"
+              y="0"
+              width="136"
+              height="464"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
+      )}
       {props.isInputted && props.noteNumber !== null && (
         <>
           {props.isSharp && (
@@ -164,6 +212,42 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   -webkit-box-sizing: border-box;
   margin: 0;
   padding: 0;
+`;
+
+// 調号のシャープ記号のスタイル
+// ト音記号の右側、固定位置に表示
+const getKeySignatureSharpStyle = (index: number = 0) => css`
+  position: absolute;
+  left: calc(85px + ${index * 10}px);
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  width: 60px;
+  height: 65px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+`;
+
+// 調号のフラット記号のスタイル
+// ト音記号の右側、固定位置に表示
+const getKeySignatureFlatStyle = (index: number = 0) => css`
+  position: absolute;
+  left: calc(85px + ${index * 10}px);
+  top: 50%;
+  transform: translateY(calc(-50% - 12px));
+  -webkit-transform: translateY(calc(-50% - 12px));
+  width: 60px;
+  height: 65px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 `;
 
 export default Bar;

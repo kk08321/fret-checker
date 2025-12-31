@@ -3,6 +3,8 @@ import { css } from "@emotion/react";
 import Bar from "./Bar";
 import ControlPanel from "./components/ControlPanel";
 import { useSheetPage } from "./hooks/useSheetPage";
+import { useKeySignature } from "./contexts/KeySignatureContext";
+import { KEY_SIGNATURES } from "./utils/keySignature";
 import {
   sheetWrapper,
   whiteBarWrapperCss,
@@ -30,6 +32,8 @@ function SheetPage() {
     isFlatMode,
     setIsFlatMode,
   } = useSheetPage();
+  
+  const { selectedKeySignature } = useKeySignature();
 
   // 連続する音符のグループを検出し、各音符のオフセットを計算
   const calculateOffset = (noteNum: number): number => {
@@ -274,6 +278,28 @@ function SheetPage() {
           const currentNoteNum = 23 - i;
           const horizontalOffset = calculateOffset(currentNoteNum);
           
+          // 調号記号の情報を取得
+          let showKeySignatureSharp = false;
+          let showKeySignatureFlat = false;
+          let keySignatureIndex: number | undefined = undefined;
+          
+          if (selectedKeySignature) {
+            const keySignature = KEY_SIGNATURES[selectedKeySignature];
+            // シャープ記号の位置をチェック
+            const sharpIndex = keySignature.sharps.findIndex(noteNum => noteNum === currentNoteNum);
+            if (sharpIndex !== -1) {
+              showKeySignatureSharp = true;
+              keySignatureIndex = sharpIndex;
+            }
+            
+            // フラット記号の位置をチェック
+            const flatIndex = keySignature.flats.findIndex(noteNum => noteNum === currentNoteNum);
+            if (flatIndex !== -1) {
+              showKeySignatureFlat = true;
+              keySignatureIndex = flatIndex;
+            }
+          }
+          
           return (
             <Bar
               key={note}
@@ -287,6 +313,9 @@ function SheetPage() {
               horizontalOffset={horizontalOffset}
               isSharp={isSharp}
               isFlat={isFlat}
+              showKeySignatureSharp={showKeySignatureSharp}
+              showKeySignatureFlat={showKeySignatureFlat}
+              keySignatureIndex={keySignatureIndex}
             />
           );
         })}

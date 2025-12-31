@@ -6,11 +6,13 @@ import SheetPage from "./SheetPage";
 import Test from "./Test";
 import FretboardPage from "./FretboardPage";
 import { GuitarNotesProvider } from "./contexts/GuitarNotesContext";
+import { KeySignatureProvider } from "./contexts/KeySignatureContext";
 
 function App() {
   return (
     <GuitarNotesProvider>
-      <BrowserRouter>
+      <KeySignatureProvider>
+        <BrowserRouter>
       <div
         css={css`
           width: 100vw;
@@ -253,6 +255,7 @@ function App() {
         </div>
       </div>
       </BrowserRouter>
+      </KeySignatureProvider>
     </GuitarNotesProvider>
   );
 }
