@@ -12,6 +12,8 @@ interface ControlPanelProps {
   isSharpMode?: boolean;
   onFlatModeStart?: (enabled: boolean) => void;
   isFlatMode?: boolean;
+  onNaturalModeStart?: (enabled: boolean) => void;
+  isNaturalMode?: boolean;
 }
 
 const clearIconButton = css`
@@ -99,6 +101,37 @@ const flatIconButtonActive = css`
   border: 2px solid #2e5c8a;
 `;
 
+const naturalIconButton = css`
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #888;
+  margin: 10px auto;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+  }
+  
+  &:active {
+    background-color: #666;
+    transform: scale(0.95);
+  }
+`;
+
+const naturalIconButtonActive = css`
+  background-color: #4a90e2;
+  box-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+  transform: scale(1.1);
+  border: 2px solid #2e5c8a;
+`;
+
 const undoIconButton = css`
   width: 50px;
   height: 50px;
@@ -122,7 +155,7 @@ const undoIconButton = css`
   }
 `;
 
-function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false }: ControlPanelProps) {
+function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
   const handleClearClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -137,6 +170,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
 
   const sharpIconRef = useRef<HTMLDivElement>(null);
   const flatIconRef = useRef<HTMLDivElement>(null);
+  const naturalIconRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sharpIconElement = sharpIconRef.current;
@@ -169,6 +203,22 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
       flatIconElement.removeEventListener('touchstart', handleTouchStart);
     };
   }, [onFlatModeStart]);
+
+  useEffect(() => {
+    const naturalIconElement = naturalIconRef.current;
+    if (!naturalIconElement) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      onNaturalModeStart?.(true);
+    };
+
+    naturalIconElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+    return () => {
+      naturalIconElement.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, [onNaturalModeStart]);
 
   return (
     <div css={controlWrapper} ref={controlWrapperRef}>
@@ -241,7 +291,38 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         </div>
       </div>
       <div css={iconContainer}>
-        <div css={icon}></div>
+        <div 
+          ref={naturalIconRef}
+          css={[
+            naturalIconButton, 
+            isNaturalMode && naturalIconButtonActive,
+            css`
+              touch-action: none;
+            `
+          ]}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 136 464"
+            css={css`
+              width: 28px;
+              height: 28px;
+            `}
+            style={{
+              filter: 'brightness(0) invert(1)'
+            }}
+          >
+            <image
+              href="/images/natural.png"
+              x="0"
+              y="0"
+              width="136"
+              height="464"
+              preserveAspectRatio="xMidYMid meet"
+            />
+          </svg>
+        </div>
       </div>
       <div css={iconContainer} onClick={handleUndoClick}>
         <div css={undoIconButton}>
@@ -274,12 +355,12 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         </div>
       </div>
       <div css={messageWrapper}>
-        <p css={fretLabel}>{notes.length >= 1 && notes[0]}</p>
-        <p css={fretLabel}>{notes.length >= 2 && notes[1]}</p>
-        <p css={fretLabel}>{notes.length >= 3 && notes[2]}</p>
-        <p css={fretLabel}>{notes.length >= 4 && notes[3]}</p>
-        <p css={fretLabel}>{notes.length >= 5 && notes[4]}</p>
-        <p css={fretLabel}>{notes.length >= 6 && notes[5]}</p>
+        <p css={fretLabel}>{notes.length >= 1 && `1. ${notes[0]}`}</p>
+        <p css={fretLabel}>{notes.length >= 2 && `2. ${notes[1]}`}</p>
+        <p css={fretLabel}>{notes.length >= 3 && `3. ${notes[2]}`}</p>
+        <p css={fretLabel}>{notes.length >= 4 && `4. ${notes[3]}`}</p>
+        <p css={fretLabel}>{notes.length >= 5 && `5. ${notes[4]}`}</p>
+        <p css={fretLabel}>{notes.length >= 6 && `6. ${notes[5]}`}</p>
       </div>
     </div>
   );

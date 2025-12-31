@@ -4,7 +4,7 @@ import Bar from "./Bar";
 import ControlPanel from "./components/ControlPanel";
 import { useSheetPage } from "./hooks/useSheetPage";
 import { useKeySignature } from "./contexts/KeySignatureContext";
-import { KEY_SIGNATURES } from "./utils/keySignature";
+import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "./utils/keySignature";
 import {
   sheetWrapper,
   whiteBarWrapperCss,
@@ -31,6 +31,8 @@ function SheetPage() {
     setIsSharpMode,
     isFlatMode,
     setIsFlatMode,
+    isNaturalMode,
+    setIsNaturalMode,
   } = useSheetPage();
   
   const { selectedKeySignature } = useKeySignature();
@@ -39,9 +41,9 @@ function SheetPage() {
   const calculateOffset = (noteNum: number): number => {
     if (inputtedNoteNumbers.length === 0) return 0;
     
-    // 入力された音符を数値に変換してソート（シャープ記号とフラット記号を除去してからparseInt）
+    // 入力された音符を数値に変換してソート（シャープ記号、フラット記号、ナチュラル記号を除去してからparseInt）
     const inputtedNums = inputtedNoteNumbers
-      .map(n => parseInt(n.replace('#', '').replace('b', ''), 10))
+      .map(n => parseInt(n.replace('#', '').replace('b', '').replace('n', ''), 10))
       .filter(n => !isNaN(n))
       .sort((a, b) => a - b);
     
@@ -104,6 +106,7 @@ function SheetPage() {
   const handleSharpModeStart = (enabled: boolean) => {
     if (enabled) {
       setIsFlatMode(false); // フラットモードをリセット
+      setIsNaturalMode(false); // ナチュラルモードをリセット
     }
     setIsSharpMode(enabled);
   };
@@ -111,8 +114,17 @@ function SheetPage() {
   const handleFlatModeStart = (enabled: boolean) => {
     if (enabled) {
       setIsSharpMode(false); // シャープモードをリセット
+      setIsNaturalMode(false); // ナチュラルモードをリセット
     }
     setIsFlatMode(enabled);
+  };
+
+  const handleNaturalModeStart = (enabled: boolean) => {
+    if (enabled) {
+      setIsSharpMode(false); // シャープモードをリセット
+      setIsFlatMode(false); // フラットモードをリセット
+    }
+    setIsNaturalMode(enabled);
   };
 
   return (
@@ -208,6 +220,46 @@ function SheetPage() {
           <span>フラットモード</span>
         </div>
       )}
+      {isNaturalMode && (
+        <div
+          css={css`
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            -webkit-transform: translateX(-50%);
+            background-color: rgba(74, 144, 226, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            animation: fadeIn 0.2s ease;
+            
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+                -webkit-transform: translateX(-50%) translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+                -webkit-transform: translateX(-50%) translateY(0);
+              }
+            }
+          `}
+        >
+          <span>♮</span>
+          <span>ナチュラルモード</span>
+        </div>
+      )}
       <div
         css={[
           sheetWrapper,
@@ -265,14 +317,9 @@ function SheetPage() {
             ? whiteBarCss 
             : (isBlackLong ? blackLongBarCss : blackShortBarCss);
           
-          // シャープ記号とフラット記号を除去して比較（"0#"と"0b"と"0"をマッチさせるため）
-          const noteIndex = inputtedNoteNumbers.findIndex(n => n.replace('#', '').replace('b', '') === note);
+          // シャープ記号、フラット記号、ナチュラル記号を除去して比較（"0#"と"0b"と"0n"と"0"をマッチさせるため）
+          const noteIndex = inputtedNoteNumbers.findIndex(n => n.replace('#', '').replace('b', '').replace('n', '') === note);
           const isInputted = noteIndex !== -1;
-          
-          // シャープ付きかどうかを判定
-          const isSharp = isInputted && inputtedNoteNumbers[noteIndex].includes('#');
-          // フラット付きかどうかを判定
-          const isFlat = isInputted && inputtedNoteNumbers[noteIndex].includes('b');
           
           // 連続する音符のグループを考慮してオフセットを計算
           const currentNoteNum = 23 - i;
@@ -282,9 +329,15 @@ function SheetPage() {
           let showKeySignatureSharp = false;
           let showKeySignatureFlat = false;
           let keySignatureIndex: number | undefined = undefined;
+          let isKeySignatureSharp = false;
+          let isKeySignatureFlat = false;
           
           if (selectedKeySignature) {
             const keySignature = KEY_SIGNATURES[selectedKeySignature];
+            const { sharpNames, flatNames } = getKeySignatureNoteNames(keySignature);
+            const currentNoteName = getNoteNameFromNoteNumber(currentNoteNum);
+            
+            // 調号記号の表示位置は元の設定（特定のnote番号）で判定
             // シャープ記号の位置をチェック
             const sharpIndex = keySignature.sharps.findIndex(noteNum => noteNum === currentNoteNum);
             if (sharpIndex !== -1) {
@@ -298,7 +351,23 @@ function SheetPage() {
               showKeySignatureFlat = true;
               keySignatureIndex = flatIndex;
             }
+            
+            // 臨時記号の表示判定は音名ベース（調号により自動適用された音名かどうか）
+            if (sharpNames.has(currentNoteName)) {
+              isKeySignatureSharp = true;
+            }
+            if (flatNames.has(currentNoteName)) {
+              isKeySignatureFlat = true;
+            }
           }
+          
+          // ナチュラル付きかどうかを判定
+          const isNatural = isInputted && inputtedNoteNumbers[noteIndex].includes('n');
+          
+          // シャープ付きかどうかを判定（調号により自動適用されたものは除外、ナチュラルが付いている場合は表示しない）
+          const isSharp = isInputted && inputtedNoteNumbers[noteIndex].includes('#') && !isKeySignatureSharp && !isNatural;
+          // フラット付きかどうかを判定（調号により自動適用されたものは除外、ナチュラルが付いている場合は表示しない）
+          const isFlat = isInputted && inputtedNoteNumbers[noteIndex].includes('b') && !isKeySignatureFlat && !isNatural;
           
           return (
             <Bar
@@ -313,6 +382,7 @@ function SheetPage() {
               horizontalOffset={horizontalOffset}
               isSharp={isSharp}
               isFlat={isFlat}
+              isNatural={isNatural}
               showKeySignatureSharp={showKeySignatureSharp}
               showKeySignatureFlat={showKeySignatureFlat}
               keySignatureIndex={keySignatureIndex}
@@ -330,6 +400,8 @@ function SheetPage() {
         isSharpMode={isSharpMode}
         onFlatModeStart={handleFlatModeStart}
         isFlatMode={isFlatMode}
+        onNaturalModeStart={handleNaturalModeStart}
+        isNaturalMode={isNaturalMode}
       />
     </div>
   );

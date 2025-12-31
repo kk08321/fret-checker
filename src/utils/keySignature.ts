@@ -1,5 +1,29 @@
 // 調号の定義
 
+// note番号から音名を取得（E, F, G, A, B, C, D）
+// note番号は、SheetPageの24本の線に対応（23が上、0が下）
+// scaleOffsets = [0, 1, 3, 5, 7, 8, 10] は [E, F, G, A, B, C, D] に対応
+export const getNoteNameFromNoteNumber = (noteNum: number): string => {
+  const noteNames = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+  const scaleIndex = noteNum % 7;
+  return noteNames[scaleIndex];
+};
+
+// 音名からnote番号の配列を取得（0-23の範囲で）
+export const getNoteNumbersByNoteName = (noteName: string): number[] => {
+  const noteNames = ['E', 'F', 'G', 'A', 'B', 'C', 'D'];
+  const scaleIndex = noteNames.indexOf(noteName);
+  if (scaleIndex === -1) return [];
+  
+  const noteNumbers: number[] = [];
+  for (let i = 0; i < 24; i++) {
+    if (i % 7 === scaleIndex) {
+      noteNumbers.push(i);
+    }
+  }
+  return noteNumbers;
+};
+
 export type KeySignatureType = 
   | 'G major' 
   | 'D major' 
@@ -17,9 +41,27 @@ export type KeySignatureType =
 export interface KeySignature {
   type: KeySignatureType;
   displayName: string;
-  sharps: number[]; // シャープが付くnote番号（0-23）の配列（表示順序通り）
-  flats: number[]; // フラットが付くnote番号（0-23）の配列（表示順序通り）
+  sharps: number[]; // シャープが付くnote番号（0-23）の配列（表示順序通り、音名ベースで判定）
+  flats: number[]; // フラットが付くnote番号（0-23）の配列（表示順序通り、音名ベースで判定）
 }
+
+// 調号のシャープ/フラットが適用される音名のセットを取得
+export const getKeySignatureNoteNames = (keySignature: KeySignature): { sharpNames: Set<string>; flatNames: Set<string> } => {
+  const sharpNames = new Set<string>();
+  const flatNames = new Set<string>();
+  
+  keySignature.sharps.forEach(noteNum => {
+    const noteName = getNoteNameFromNoteNumber(noteNum);
+    sharpNames.add(noteName);
+  });
+  
+  keySignature.flats.forEach(noteNum => {
+    const noteName = getNoteNameFromNoteNumber(noteNum);
+    flatNames.add(noteName);
+  });
+  
+  return { sharpNames, flatNames };
+};
 
 // 調号の定義
 // シャープ/フラットが付くnote番号（0-23）を直接指定

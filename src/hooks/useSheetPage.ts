@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { convertNoteToGuitarPositions } from "../utils/midi";
 import { useGuitarNotes } from "../contexts/GuitarNotesContext";
+import { useKeySignature } from "../contexts/KeySignatureContext";
+import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
 
 interface Coordinates {
   x: number;
@@ -13,7 +15,9 @@ export const useSheetPage = () => {
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
   const [isSharpMode, setIsSharpMode] = useState(false);
   const [isFlatMode, setIsFlatMode] = useState(false);
+  const [isNaturalMode, setIsNaturalMode] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
+  const { selectedKeySignature } = useKeySignature();
   
   // inputtedNoteNumbersから動的にnotesを計算
   const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr));
@@ -45,9 +49,10 @@ export const useSheetPage = () => {
         touchCoordinates.y >= controlRect.top &&
         touchCoordinates.y <= controlRect.bottom
       ) {
-        // ControlPanelの範囲内の場合はnote入力をスキップし、シャープモードとフラットモードをリセット
+        // ControlPanelの範囲内の場合はnote入力をスキップし、シャープモードとフラットモード、ナチュラルモードをリセット
         setIsSharpMode(false);
         setIsFlatMode(false);
+        setIsNaturalMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -66,9 +71,10 @@ export const useSheetPage = () => {
         touchCoordinates.y < barTop ||
         touchCoordinates.y > barBottom
       ) {
-        // Barの範囲外の場合はnote入力をスキップし、シャープモードとフラットモードをリセット
+        // Barの範囲外の場合はnote入力をスキップし、シャープモードとフラットモード、ナチュラルモードをリセット
         setIsSharpMode(false);
         setIsFlatMode(false);
+        setIsNaturalMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -80,15 +86,39 @@ export const useSheetPage = () => {
     }
     if (selectedNote !== null) {
       let noteToAdd = selectedNote;
-      if (isSharpMode) {
+      const noteNum = parseInt(selectedNote, 10);
+      
+      // 手動モードが有効な場合はそれを優先
+      if (isNaturalMode) {
+        // ナチュラルモード: 調号のシャープ/フラットを無効化
+        noteToAdd = `${selectedNote}n`;
+      } else if (isSharpMode) {
         noteToAdd = `${selectedNote}#`;
       } else if (isFlatMode) {
         noteToAdd = `${selectedNote}b`;
+      } else if (selectedKeySignature && !isNaN(noteNum)) {
+        // 調号設定に基づいて自動的にシャープ/フラットを適用
+        const keySignature = KEY_SIGNATURES[selectedKeySignature];
+        const { sharpNames, flatNames } = getKeySignatureNoteNames(keySignature);
+        
+        // note番号から音名を取得
+        const noteName = getNoteNameFromNoteNumber(noteNum);
+        
+        // 調号のシャープに含まれている音名かチェック
+        if (sharpNames.has(noteName)) {
+          noteToAdd = `${selectedNote}#`;
+        }
+        // 調号のフラットに含まれている音名かチェック
+        else if (flatNames.has(noteName)) {
+          noteToAdd = `${selectedNote}b`;
+        }
       }
+      
       noteNumbersCopy.push(noteToAdd);
-      // シャープモードとフラットモードをリセット
+      // シャープモードとフラットモード、ナチュラルモードをリセット
       setIsSharpMode(false);
       setIsFlatMode(false);
+      setIsNaturalMode(false);
     }
     // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
@@ -113,6 +143,8 @@ export const useSheetPage = () => {
     setIsSharpMode,
     isFlatMode,
     setIsFlatMode,
+    isNaturalMode,
+    setIsNaturalMode,
   };
 };
 

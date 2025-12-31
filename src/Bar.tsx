@@ -18,6 +18,7 @@ interface BarProps {
   horizontalOffset?: number;
   isSharp?: boolean;
   isFlat?: boolean;
+  isNatural?: boolean;
   showKeySignatureSharp?: boolean;
   showKeySignatureFlat?: boolean;
   keySignatureIndex?: number; // 調号記号の左からの順番（0始まり）
@@ -142,6 +143,28 @@ function Bar(props: BarProps) {
               </svg>
             </div>
           )}
+          {props.isNatural && (
+            <div css={getNaturalStyle(props.horizontalOffset)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 136 464"
+                css={css`
+                  width: 100%;
+                  height: 100%;
+                `}
+              >
+                <image
+                  href="/images/natural.png"
+                  x="0"
+                  y="0"
+                  width="136"
+                  height="464"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              </svg>
+            </div>
+          )}
           <div css={getNoteEllipseStyle(props.horizontalOffset)}>
             {props.noteNumber}
           </div>
@@ -152,7 +175,7 @@ function Bar(props: BarProps) {
 }
 
 const selected = css`
-  background-color: #FBB;
+  background-color: #F99;
 `
 
 const getSharpStyle = (offset: number = 0) => css`
@@ -177,6 +200,22 @@ const getFlatStyle = (offset: number = 0) => css`
   top: 50%;
   transform: translateY(calc(-50% - 12px));
   -webkit-transform: translateY(calc(-50% - 12px));
+  width: 60px;
+  height: 65px;
+  z-index: 201;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+`;
+
+const getNaturalStyle = (offset: number = 0) => css`
+  position: absolute;
+  left: calc(70% - 25px - 60px - 8px + ${offset}px);
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
   width: 60px;
   height: 65px;
   z-index: 201;
