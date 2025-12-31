@@ -4,16 +4,21 @@ import { useEffect, useRef, useState } from "react";
 
 import Bar from "./Bar";
 
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
 function SheetPage() {
-  const [touchCoordinates, setTouchCoordinates] = useState(null);
-  const [selectedNote, setSelectedNote] = useState(null);
-  const pageWrapperRef = useRef(null);
-  const controlWrapperRef = useRef(null);
+  const [touchCoordinates, setTouchCoordinates] = useState<Coordinates | null>(null);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const pageWrapperRef = useRef<HTMLDivElement>(null);
+  const controlWrapperRef = useRef<HTMLDivElement>(null);
 
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<string[]>([]);
 
-  const setCoordinatesByTouchEvent = (e) => {
+  const setCoordinatesByTouchEvent = (e: React.TouchEvent<HTMLDivElement>) => {
     setTouchCoordinates({ x: e.touches[0].clientX, y: e.touches[0].clientY });
   };
 
@@ -25,14 +30,16 @@ function SheetPage() {
           controlWrapperRef.current.getBoundingClientRect().height
       );
     }
-  }, [controlWrapperRef, pageWrapperRef, selectedNote]);
+  }, [selectedNote]);
 
   const onEnter = () => {
-    let notesCopy = [];
+    let notesCopy: string[] = [];
     if (notes.length < 6) {
-      notesCopy = notes;
+      notesCopy = [...notes];
     }
-    notesCopy.push(selectedNote);
+    if (selectedNote !== null) {
+      notesCopy.push(selectedNote);
+    }
     setNotes(notesCopy);
     setTouchCoordinates({ x: 0, y: -100 });
   };
