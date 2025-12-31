@@ -18,9 +18,6 @@ export const noteNumberToMidi = (noteNum: number): number => {
   // 現在の音階インデックスから基準音階までの差を計算
   const scaleOffset = scaleOffsets[scaleIndex] - scaleOffsets[baseScaleIndex];
   
-  console.log(scaleIndex);
-  console.log(baseScaleIndex);
-  
   // MIDIノート番号を計算
   return baseMidi + octaveOffset * 12 + scaleOffset;
 };
