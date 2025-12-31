@@ -16,6 +16,10 @@ export const icon = css`
   border-radius: 25px;
   background-color: #bbb;
   margin: 10px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 `;
 
 export const messageWrapper = css`

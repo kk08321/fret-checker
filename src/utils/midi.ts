@@ -64,12 +64,17 @@ export const getGuitarPositions = (midi: number): Array<{ string: number; fret: 
 
 // 音符番号をギター押弦箇所の文字列に変換
 export const convertNoteToGuitarPositions = (noteNumStr: string): string => {
-  const noteNum = parseInt(noteNumStr, 10);
+  // シャープ記号が付いているかチェック
+  const isSharp = noteNumStr.endsWith('#');
+  const noteNumWithoutSharp = isSharp ? noteNumStr.slice(0, -1) : noteNumStr;
+  const noteNum = parseInt(noteNumWithoutSharp, 10);
   if (isNaN(noteNum)) {
     return noteNumStr;
   }
 
-  const midi = noteNumberToMidi(noteNum);
+  const baseMidi = noteNumberToMidi(noteNum);
+  // シャープが付いている場合はMIDIノート番号を+1
+  const midi = isSharp ? baseMidi + 1 : baseMidi;
   const { japaneseName, noteName, octave } = midiToNoteName(midi);
   const positions = getGuitarPositions(midi);
 

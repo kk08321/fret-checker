@@ -16,6 +16,7 @@ interface BarProps {
   isInputted: boolean;
   noteNumber: number | null;
   horizontalOffset?: number;
+  isSharp?: boolean;
 }
 
 const getHighlighted = (targetRef: React.RefObject<HTMLDivElement>, coordinates: Coordinates | null): boolean => {
@@ -47,9 +48,33 @@ function Bar(props: BarProps) {
     <div css={props.wrapperCss} ref={targetRef}>
       <div css={[props.barCss, highlighted ? selected : null]}></div>
       {props.isInputted && props.noteNumber !== null && (
-        <div css={getNoteEllipseStyle(props.horizontalOffset)}>
-          {props.noteNumber}
-        </div>
+        <>
+          {props.isSharp && (
+            <div css={getSharpStyle(props.horizontalOffset)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 136 464"
+                css={css`
+                  width: 100%;
+                  height: 100%;
+                `}
+              >
+                <image
+                  href="/images/sharp.png"
+                  x="0"
+                  y="0"
+                  width="136"
+                  height="464"
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              </svg>
+            </div>
+          )}
+          <div css={getNoteEllipseStyle(props.horizontalOffset)}>
+            {props.noteNumber}
+          </div>
+        </>
       )}
     </div>
   );
@@ -58,6 +83,19 @@ function Bar(props: BarProps) {
 const selected = css`
   background-color: #FBB;
 `
+
+const getSharpStyle = (offset: number = 0) => css`
+  position: absolute;
+  left: calc(70% - 25px - 60px - 8px + ${offset}px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 65px;
+  z-index: 201;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 const getNoteEllipseStyle = (offset: number = 0) => css`
   position: absolute;

@@ -11,6 +11,7 @@ export const useSheetPage = () => {
   const [touchCoordinates, setTouchCoordinates] = useState<Coordinates | null>(null);
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
+  const [isSharpMode, setIsSharpMode] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   
   // inputtedNoteNumbersから動的にnotesを計算
@@ -43,7 +44,8 @@ export const useSheetPage = () => {
         touchCoordinates.y >= controlRect.top &&
         touchCoordinates.y <= controlRect.bottom
       ) {
-        // ControlPanelの範囲内の場合はnote入力をスキップ
+        // ControlPanelの範囲内の場合はnote入力をスキップし、シャープモードをリセット
+        setIsSharpMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -62,7 +64,8 @@ export const useSheetPage = () => {
         touchCoordinates.y < barTop ||
         touchCoordinates.y > barBottom
       ) {
-        // Barの範囲外の場合はnote入力をスキップ
+        // Barの範囲外の場合はnote入力をスキップし、シャープモードをリセット
+        setIsSharpMode(false);
         setTouchCoordinates({ x: 0, y: -100 });
         return;
       }
@@ -73,7 +76,10 @@ export const useSheetPage = () => {
       noteNumbersCopy = [...inputtedNoteNumbers];
     }
     if (selectedNote !== null) {
-      noteNumbersCopy.push(selectedNote);
+      const noteToAdd = isSharpMode ? `${selectedNote}#` : selectedNote;
+      noteNumbersCopy.push(noteToAdd);
+      // シャープモードをリセット
+      setIsSharpMode(false);
     }
     // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
@@ -83,15 +89,19 @@ export const useSheetPage = () => {
 
   return {
     touchCoordinates,
+    setTouchCoordinates,
     selectedNote,
     setSelectedNote,
     sheetWrapperHeight,
     notes,
     inputtedNoteNumbers,
+    setInputtedNoteNumbers,
     pageWrapperRef,
     controlWrapperRef,
     setCoordinatesByTouchEvent,
     onEnter,
+    isSharpMode,
+    setIsSharpMode,
   };
 };
 

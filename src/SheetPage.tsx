@@ -15,23 +15,27 @@ import {
 function SheetPage() {
   const {
     touchCoordinates,
+    setTouchCoordinates,
     setSelectedNote,
     sheetWrapperHeight,
     notes,
     inputtedNoteNumbers,
+    setInputtedNoteNumbers,
     pageWrapperRef,
     controlWrapperRef,
     setCoordinatesByTouchEvent,
     onEnter,
+    setIsSharpMode,
   } = useSheetPage();
 
   // 連続する音符のグループを検出し、各音符のオフセットを計算
   const calculateOffset = (noteNum: number): number => {
     if (inputtedNoteNumbers.length === 0) return 0;
     
-    // 入力された音符を数値に変換してソート
+    // 入力された音符を数値に変換してソート（シャープ記号を除去してからparseInt）
     const inputtedNums = inputtedNoteNumbers
-      .map(n => parseInt(n, 10))
+      .map(n => parseInt(n.replace('#', ''), 10))
+      .filter(n => !isNaN(n))
       .sort((a, b) => a - b);
     
     // 現在の音符が入力されているかチェック
@@ -72,6 +76,24 @@ function SheetPage() {
     }
   };
 
+  const handleClearSelection = () => {
+    setSelectedNote(null);
+    setTouchCoordinates(null);
+    // 最後に入力された音符を削除
+    if (inputtedNoteNumbers.length > 0) {
+      setInputtedNoteNumbers([]);
+    }
+  };
+
+  const handleUndo = () => {
+    setSelectedNote(null);
+    setTouchCoordinates(null);
+    // 最後に入力された音符を1つ削除
+    if (inputtedNoteNumbers.length > 0) {
+      setInputtedNoteNumbers(inputtedNoteNumbers.slice(0, -1));
+    }
+  };
+
   return (
     <div
       ref={pageWrapperRef}
@@ -107,8 +129,12 @@ function SheetPage() {
             ? whiteBarCss 
             : (isBlackLong ? blackLongBarCss : blackShortBarCss);
           
-          const noteIndex = inputtedNoteNumbers.indexOf(note);
+          // シャープ記号を除去して比較（"0#"と"0"をマッチさせるため）
+          const noteIndex = inputtedNoteNumbers.findIndex(n => n.replace('#', '') === note);
           const isInputted = noteIndex !== -1;
+          
+          // シャープ付きかどうかを判定
+          const isSharp = isInputted && inputtedNoteNumbers[noteIndex].includes('#');
           
           // 連続する音符のグループを考慮してオフセットを計算
           const currentNoteNum = 23 - i;
@@ -125,12 +151,19 @@ function SheetPage() {
               isInputted={isInputted}
               noteNumber={isInputted ? noteIndex + 1 : null}
               horizontalOffset={horizontalOffset}
+              isSharp={isSharp}
             />
           );
         })}
       </div>
 
-      <ControlPanel notes={notes} controlWrapperRef={controlWrapperRef} />
+      <ControlPanel 
+        notes={notes} 
+        controlWrapperRef={controlWrapperRef} 
+        onClearSelection={handleClearSelection} 
+        onUndo={handleUndo}
+        onSharpModeStart={setIsSharpMode}
+      />
     </div>
   );
 }
