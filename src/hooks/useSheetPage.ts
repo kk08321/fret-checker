@@ -30,6 +30,40 @@ export const useSheetPage = () => {
   }, [selectedNote]);
 
   const onEnter = () => {
+    // タッチ位置がControlPanelの範囲内かチェック
+    if (controlWrapperRef.current && touchCoordinates) {
+      const controlRect = controlWrapperRef.current.getBoundingClientRect();
+      if (
+        touchCoordinates.x >= controlRect.left &&
+        touchCoordinates.x <= controlRect.right &&
+        touchCoordinates.y >= controlRect.top &&
+        touchCoordinates.y <= controlRect.bottom
+      ) {
+        // ControlPanelの範囲内の場合はnote入力をスキップ
+        setTouchCoordinates({ x: 0, y: -100 });
+        return;
+      }
+    }
+
+    // タッチ位置がBarの範囲内かチェック（sheetWrapperの範囲内か）
+    if (pageWrapperRef.current && touchCoordinates) {
+      const pageRect = pageWrapperRef.current.getBoundingClientRect();
+      const controlRect = controlWrapperRef.current?.getBoundingClientRect();
+      
+      // Barの範囲は、pageWrapperからcontrolWrapperを除いた部分
+      const barTop = pageRect.top;
+      const barBottom = controlRect ? controlRect.top : pageRect.bottom;
+      
+      if (
+        touchCoordinates.y < barTop ||
+        touchCoordinates.y > barBottom
+      ) {
+        // Barの範囲外の場合はnote入力をスキップ
+        setTouchCoordinates({ x: 0, y: -100 });
+        return;
+      }
+    }
+
     let notesCopy: string[] = [];
     if (notes.length < 6) {
       notesCopy = [...notes];
