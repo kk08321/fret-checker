@@ -25,7 +25,7 @@ export const noteNumberToMidi = (noteNum: number): number => {
 // MIDIノート番号から音名と音階名を取得
 export const midiToNoteName = (midi: number): { noteName: string; octave: number; japaneseName: string } => {
   const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const japaneseNames = ['ド', 'ド#', 'レ', 'レ#', 'ミ', 'ファ', 'ファ#', 'ソ', 'ソ#', 'ラ', 'ラ#', 'シ'];
+  const japaneseNames = ['ド', 'ド#', 'レ', 'レ#', 'ミ', 'ﾌｧ', 'ﾌｧ#', 'ソ', 'ソ#', 'ラ', 'ラ#', 'シ'];
   const octave = Math.floor(midi / 12) - 1;
   const noteIndex = midi % 12;
   return {

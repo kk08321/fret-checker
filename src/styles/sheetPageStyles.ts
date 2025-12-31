@@ -23,6 +23,8 @@ export const messageWrapper = css`
     margin: 0;
   }
   padding-bottom: 5px;
+  overflow-x: auto;
+  width: 100%;
 `;
 
 export const controlWrapper = css`
@@ -81,5 +83,7 @@ export const fretLabel = css`
   height: 1.5em;
   clear: both;
   float: none;
+  white-space: nowrap;
+  min-width: max-content;
 `;
 
