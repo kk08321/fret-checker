@@ -206,9 +206,39 @@ function SheetPage() {
           sheetWrapper,
           css`
             height: ${sheetWrapperHeight}px;
+            position: relative;
           `,
         ]}
       >
+        {/* ト音記号 */}
+        {(() => {
+          return (
+            <>
+              <div
+                css={css`
+                  position: absolute;
+                  left: 20px;
+                  top: 30%;
+                  height: 48%;
+                  z-index: 50;
+                  display: flex;
+                  align-items: flex-start;
+                  justify-content: flex-start;
+                `}
+              >
+                <img
+                  src="/images/gcref.png"
+                  alt="ト音記号"
+                  css={css`
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                  `}
+                />
+              </div>
+            </>
+          );
+        })()}
         {Array.from({ length: 24 }, (_, i) => {
           const note = String(23 - i);
           const isEven = (23 - i) % 2 === 0;
