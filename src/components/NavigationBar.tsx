@@ -111,7 +111,7 @@ export const NavigationBar = () => {
       `}
     >
       {navItems.map((item) => {
-        const LinkComponent = Link as React.ElementType;
+        const LinkComponent = Link as React.ComponentType<React.ComponentProps<typeof Link>>;
         return (
           <LinkComponent
             key={item.path}
