@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { BrowserRouter, Route, Routes, Link } from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import React from "react";
 import SheetPage from "./SheetPage";
 import Test from "./Test";
 import FretboardPage from "./FretboardPage";
@@ -47,8 +48,7 @@ function App() {
             z-index: 1000;
           `}
         >
-          <Link
-            to="/sheet/"
+          <div
             css={css`
               width: 33.33%;
               display: flex;
@@ -62,10 +62,24 @@ function App() {
               }
             `}
           >
-            a
-          </Link>
-          <Link
-            to="/fretboard/"
+            {React.createElement(
+              Link,
+              {
+                to: "/sheet/",
+                style: {
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  textDecoration: "none",
+                },
+              },
+              "a"
+            )}
+          </div>
+          <div
             css={css`
               width: 33.33%;
               display: flex;
@@ -79,10 +93,24 @@ function App() {
               }
             `}
           >
-            b
-          </Link>
-          <Link
-            to="/test/"
+            {React.createElement(
+              Link,
+              {
+                to: "/fretboard/",
+                style: {
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  textDecoration: "none",
+                },
+              },
+              "b"
+            )}
+          </div>
+          <div
             css={css`
               width: 33.33%;
               display: flex;
@@ -96,8 +124,23 @@ function App() {
               }
             `}
           >
-            c
-          </Link>
+            {React.createElement(
+              Link,
+              {
+                to: "/test/",
+                style: {
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  textDecoration: "none",
+                },
+              },
+              "c"
+            )}
+          </div>
         </div>
       </div>
       </BrowserRouter>
