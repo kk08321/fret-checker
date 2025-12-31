@@ -33,9 +33,31 @@ function FretboardPage() {
     return positions;
   };
 
+  // 12平均律に基づくフレット間隔の計算
+  // フレットnからn+1までの距離は 2^(-n/12) - 2^(-(n+1)/12) に比例
+  const getFretHeight = (fret: number, baseHeight: number = 90): number => {
+    if (fret === 0) {
+      // 開放フレット（0フレット）の高さは基準の半分
+      return baseHeight / 2;
+    }
+    
+    // フレットn-1からnまでの距離を計算
+    // 2^(-(n-1)/12) - 2^(-n/12)
+    const ratio = Math.pow(2, -(fret - 1) / 12) - Math.pow(2, -fret / 12);
+    
+    // 1フレット目の比率（開放から1フレットまで）
+    const firstFretRatio = 1 - Math.pow(2, -1 / 12);
+    
+    // 1フレット目を基準に正規化
+    return baseHeight * (ratio / firstFretRatio);
+  };
+
+  // 各フレットの高さを事前計算
+  const frets = Array.from({ length: 20 }, (_, i) => i); // 0フレット（開放）から19フレット
+  const fretHeights = frets.map(fret => getFretHeight(fret));
+
   const fretPositions = getFretPositions();
   const strings = [6, 5, 4, 3, 2, 1]; // 6弦から1弦（ギターの標準的な表示順）
-  const frets = Array.from({ length: 20 }, (_, i) => i); // 0フレット（開放）から19フレット
 
   return (
     <div
@@ -75,8 +97,8 @@ function FretboardPage() {
             <div
               key={fret}
               css={css`
-                min-height: 45px;
-                height: 45px;
+                min-height: ${fretHeights[fret]}px;
+                height: ${fretHeights[fret]}px;
                 min-width: 30px;
                 width: 30px;
                 text-align: center;
@@ -120,8 +142,8 @@ function FretboardPage() {
                 display: flex;
                 flex-direction: column;
                 position: relative;
-                min-width: 35px;
-                width: 35px;
+                min-width: 28px;
+                width: 28px;
               `}
             >
               {/* 弦の縦線（クラシックギターのナイロン弦をイメージ） */}
@@ -156,10 +178,10 @@ function FretboardPage() {
                   <div
                     key={fret}
                     css={css`
-                      min-width: 35px;
-                      width: 35px;
-                      min-height: 45px;
-                      height: 45px;
+                      min-width: 28px;
+                      width: 28px;
+                      min-height: ${fretHeights[fret]}px;
+                      height: ${fretHeights[fret]}px;
                       display: flex;
                       align-items: center;
                       justify-content: center;
