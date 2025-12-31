@@ -1,70 +1,121 @@
-# Getting Started with Create React App
+# Fret Checker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ギターの五線譜からフレットボード上の押弦箇所を表示するWebアプリケーションです。タッチ操作に対応しており、モバイルデバイスでも快適に使用できます。
 
-## Available Scripts
+## 機能
 
-In the project directory, you can run:
+### 🎵 五線譜ページ
+- タッチ操作で音符を入力
+- シャープ（#）、フラット（♭）、ナチュラル（♮）モードの切り替え
+- 調号の自動適用
+- 入力した音符の一覧表示
+- アンドゥ/クリア機能
 
-### `npm start`
+### 🎸 フレットボードページ
+- 入力した音符に対応する押弦箇所を視覚的に表示
+- 複数の押弦箇所がある場合はすべて表示
+- 音符の順番を番号で表示
+- リアルなフレットボードのデザイン
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### ⚙️ 設定ページ
+- **調号の選択**: 様々な調号に対応
+- **チューニングの選択**:
+  - ノーマルチューニング (E-A-D-G-B-E)
+  - ドロップDチューニング (D-A-D-G-B-E)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 技術スタック
 
-### `npm test`
+- **React 18** - UIライブラリ
+- **TypeScript** - 型安全性
+- **Vite** - ビルドツール
+- **Emotion** - CSS-in-JS
+- **React Router** - ルーティング
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## セットアップ
 
-### `npm run build`
+### 必要な環境
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js 18.0.0以上 または 20.0.0以上
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### インストール
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# 依存関係のインストール
+npm install
+# または
+yarn install
+```
 
-### `npm run eject`
+### 開発サーバーの起動
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm run dev
+# または
+yarn dev
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+ブラウザで [http://localhost:5173](http://localhost:5173) を開いてください。
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### ビルド
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm run build
+# または
+yarn build
+```
 
-## Learn More
+ビルドされたファイルは `dist` ディレクトリに出力されます。
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### プレビュー
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm run preview
+# または
+yarn preview
+```
 
-### Code Splitting
+## 使い方
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **音符の入力**
+   - 五線譜ページで五線譜をタッチして音符を入力します
+   - シャープ/フラット/ナチュラルボタンで臨時記号を設定できます
 
-### Analyzing the Bundle Size
+2. **押弦箇所の確認**
+   - フレットボードページに移動すると、入力した音符に対応する押弦箇所が表示されます
+   - 複数の押弦箇所がある場合は、すべての位置が番号付きで表示されます
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+3. **設定の変更**
+   - 設定ページで調号やチューニングを変更できます
+   - 設定はアプリ全体に反映されます
 
-### Making a Progressive Web App
+## プロジェクト構造
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
+src/
+├── components/          # 再利用可能なコンポーネント
+│   ├── AccidentalIcon.tsx
+│   ├── ControlPanel.tsx
+│   ├── ModeBadge.tsx
+│   └── NavigationBar.tsx
+├── contexts/            # React Context
+│   ├── GuitarNotesContext.tsx
+│   ├── KeySignatureContext.tsx
+│   └── TuningContext.tsx
+├── hooks/               # カスタムフック
+│   └── useSheetPage.ts
+├── styles/              # スタイル定義
+│   └── sheetPageStyles.ts
+├── utils/               # ユーティリティ関数
+│   ├── fretboard.ts
+│   ├── keySignature.ts
+│   ├── midi.ts
+│   └── noteUtils.ts
+├── App.tsx              # メインアプリコンポーネント
+├── FretboardPage.tsx    # フレットボードページ
+├── SheetPage.tsx        # 五線譜ページ
+└── SettingsPage.tsx     # 設定ページ
+```
 
-### Advanced Configuration
+## ライセンス
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+このプロジェクトはプライベートプロジェクトです。
