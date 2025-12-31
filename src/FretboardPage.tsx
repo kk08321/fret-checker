@@ -3,22 +3,22 @@ import { css } from "@emotion/react";
 import { useGuitarNotes } from "./contexts/GuitarNotesContext";
 import { useTuning } from "./contexts/TuningContext";
 import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
+import { parseNoteNumber } from "./utils/noteUtils";
+import { calculateFretHeights } from "./utils/fretboard";
+
+const NUM_FRETS = 20;
 
 function FretboardPage() {
   const { inputtedNoteNumbers } = useGuitarNotes();
   const { tuning } = useTuning();
-
-  // デバッグ用：inputtedNoteNumbersを確認
-  console.log("FretboardPage - inputtedNoteNumbers:", inputtedNoteNumbers);
-  console.log("FretboardPage - inputtedNoteNumbers.length:", inputtedNoteNumbers.length);
 
   // 各音符から押弦箇所を計算
   const getFretPositions = () => {
     const positions: Array<{ string: number; fret: number; noteIndex: number }> = [];
     
     inputtedNoteNumbers.forEach((noteNumStr, index) => {
-      const noteNum = parseInt(noteNumStr, 10);
-      if (isNaN(noteNum)) return;
+      const noteNum = parseNoteNumber(noteNumStr);
+      if (noteNum === null) return;
       
       const midi = noteNumberToMidi(noteNum);
       const guitarPositions = getGuitarPositions(midi, tuning);
@@ -35,28 +35,9 @@ function FretboardPage() {
     return positions;
   };
 
-  // 12平均律に基づくフレット間隔の計算
-  // フレットnからn+1までの距離は 2^(-n/12) - 2^(-(n+1)/12) に比例
-  const getFretHeight = (fret: number, baseHeight: number = 90): number => {
-    if (fret === 0) {
-      // 開放フレット（0フレット）の高さは基準の半分
-      return baseHeight / 2;
-    }
-    
-    // フレットn-1からnまでの距離を計算
-    // 2^(-(n-1)/12) - 2^(-n/12)
-    const ratio = Math.pow(2, -(fret - 1) / 12) - Math.pow(2, -fret / 12);
-    
-    // 1フレット目の比率（開放から1フレットまで）
-    const firstFretRatio = 1 - Math.pow(2, -1 / 12);
-    
-    // 1フレット目を基準に正規化
-    return baseHeight * (ratio / firstFretRatio);
-  };
-
   // 各フレットの高さを事前計算
-  const frets = Array.from({ length: 20 }, (_, i) => i); // 0フレット（開放）から19フレット
-  const fretHeights = frets.map(fret => getFretHeight(fret));
+  const frets = Array.from({ length: NUM_FRETS }, (_, i) => i);
+  const fretHeights = calculateFretHeights(NUM_FRETS);
 
   const fretPositions = getFretPositions();
   const strings = [6, 5, 4, 3, 2, 1]; // 6弦から1弦（ギターの標準的な表示順）
@@ -181,6 +162,7 @@ function FretboardPage() {
               border-radius: 8px;
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
               flex-shrink: 0;
+              position: relative;
             `}
           >
           {/* 各弦（横方向に並ぶ） */}
@@ -292,6 +274,92 @@ function FretboardPage() {
             </div>
           ))}
           </div>
+          
+          {/* パールインレイ（指板全体の中央に配置） */}
+          {(() => {
+            // 各フレットまでの累積高さを計算
+            const getFretTopPosition = (fret: number): number => {
+              let position = 0;
+              for (let i = 0; i < fret; i++) {
+                position += fretHeights[i];
+              }
+              return position;
+            };
+            
+            // フレットボードの幅（6弦 × 28px）
+            const fretboardWidth = strings.length * 28;
+            const centerX = fretboardWidth / 2;
+            
+            // パールインレイのスタイル
+            const pearlInlayStyle = css`
+              position: absolute;
+              width: 9px;
+              height: 9px;
+              border-radius: 50%;
+              background: radial-gradient(
+                circle at 30% 30%,
+                rgba(255, 255, 255, 0.9) 0%,
+                rgba(255, 255, 255, 0.7) 30%,
+                rgba(240, 240, 240, 0.5) 60%,
+                rgba(200, 200, 200, 0.3) 100%
+              );
+              box-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+              z-index: 2;
+            `;
+            
+            return (
+              <>
+                {/* 5フレット：中央に1つ */}
+                <div
+                  css={[
+                    pearlInlayStyle,
+                    css`
+                      left: ${centerX}px;
+                      top: ${getFretTopPosition(5) + fretHeights[5] / 2}px;
+                      transform: translate(-50%, -50%);
+                    `,
+                  ]}
+                />
+                
+                {/* 7フレット：中央に1つ */}
+                <div
+                  css={[
+                    pearlInlayStyle,
+                    css`
+                      left: ${centerX}px;
+                      top: ${getFretTopPosition(7) + fretHeights[7] / 2}px;
+                      transform: translate(-50%, -50%);
+                    `,
+                  ]}
+                />
+                
+                {/* 12フレット：左右に2つ */}
+                <div
+                  css={[
+                    pearlInlayStyle,
+                    css`
+                      left: ${centerX - 30}px;
+                      top: ${getFretTopPosition(12) + fretHeights[12] / 2}px;
+                      transform: translate(-50%, -50%);
+                    `,
+                  ]}
+                />
+                <div
+                  css={[
+                    pearlInlayStyle,
+                    css`
+                      left: ${centerX + 30}px;
+                      top: ${getFretTopPosition(12) + fretHeights[12] / 2}px;
+                      transform: translate(-50%, -50%);
+                    `,
+                  ]}
+                />
+              </>
+            );
+          })()}
         </div>
         </div>
       </div>

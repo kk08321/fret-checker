@@ -1,262 +1,47 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import React from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SheetPage from "./SheetPage";
-import Test from "./Test";
+import SettingsPage from "./SettingsPage";
 import FretboardPage from "./FretboardPage";
 import { GuitarNotesProvider } from "./contexts/GuitarNotesContext";
 import { KeySignatureProvider } from "./contexts/KeySignatureContext";
 import { TuningProvider } from "./contexts/TuningContext";
+import { NavigationBar } from "./components/NavigationBar";
 
 function App() {
   return (
     <GuitarNotesProvider>
       <KeySignatureProvider>
         <TuningProvider>
-        <BrowserRouter>
-      <div
-        css={css`
-          width: 100vw;
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-        `}
-      >
-        <div
-          css={css`
-            width: 100%;
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            min-height: 0;
-          `}
-        >
-          <Routes>
-            <Route path={`/`} element={<SheetPage />} />
-            <Route path={`/sheet/`} element={<SheetPage />} />
-            <Route path={`/test/`} element={<Test />} />
-            <Route path={`/fretboard/`} element={<FretboardPage />} />
-          </Routes>
-        </div>
-        <div
-          css={css`
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            height: 60px;
-            background-color: #333;
-            display: flex;
-            z-index: 1000;
-          `}
-        >
-          <div
-            css={css`
-              width: 33.33%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              text-decoration: none;
-              font-size: 18px;
-              &:hover {
-                background-color: #444;
-              }
-            `}
-          >
-            {React.createElement(
-              Link,
-              {
-                to: "/sheet/",
-                style: {
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  textDecoration: "none",
-                  gap: "4px",
-                },
-              },
-              React.createElement(React.Fragment, null,
-                React.createElement("svg", {
-                  xmlns: "http://www.w3.org/2000/svg",
-                  xmlnsXlink: "http://www.w3.org/1999/xlink",
-                  viewBox: "0 0 512 512",
-                  width: "24",
-                  height: "24",
-                  style: {
-                    fill: "currentColor"
-                  }
-                },
-                  React.createElement("path", {
-                    d: "M366.789,307.317c0-47.676-38.65-86.326-86.333-86.326c-1.966,0-3.872,0.194-5.787,0.344c-1.84-14.581-3.619-28.75-5.287-42.12c20.249-14.611,40.594-28.698,55.863-43.742C379.823,81.719,364.075,0,298.918,0c-65.157,0-66.518,71.131-64.081,89.862c1.301,9.915,4.793,39.906,8.232,65.172c-1.346,1.032-2.49,1.877-3.334,2.43c-56.252,36.751-96.114,81.442-94.476,144.155c1.331,51.713,50.487,101.81,115.644,101.81c4.995,0.135,9.862-0.224,14.67-0.807c0.613,4.77,1.167,8.936,1.623,12.21c5.697,40.722-8.958,66.787-27.689,72.485c-18.738,5.705-35.838-0.816-39.091-7.328c-3.268-6.52,4.067-4.898,13.84-7.335c9.773-2.438,16.293-17.916,17.1-26.066c2.101-21.034-17.13-38.277-38.276-38.277c-21.146,0-35.66,17.303-38.284,38.277c-1.623,13.033,1.63,23.628,7.335,33.401c16.286,23.62,43.167,35.838,73.3,30.941c37.312-6.05,58.674-38.127,55.376-76.553c-0.568-6.67-2.034-19.643-4.067-36.646C337.628,383.518,366.789,344.749,366.789,307.317z M259.273,93.937c-4.883-50.502,28.78-77.374,51.586-63.526c32.452,19.702-14.424,74.952-46.748,106.013C261.853,117.67,260.126,102.723,259.273,93.937z M220.182,376.542c-40.722-21.983-44.789-85.51-20.361-130.314c10.723-19.65,29.199-36.504,49.627-52.251c1.077,6.243,2.654,17.564,4.531,32.063c-32.975,12.965-53.231,49.021-43.742,83.214c7.754,27.92,34.403,33.341,39.57,26.739c2.984-3.813-7.582-6.259-14.14-25.924c-4.71-14.132-3.267-30.44,9.766-41.02c4-3.253,8.375-5.84,12.966-7.791c5.024,40.893,10.826,90.251,14.97,123.779C256.843,387.848,238.12,386.232,220.182,376.542z M319.548,360.257c-4.943,6.684-13.878,13.444-25.109,18.416c-4.15-33.872-9.72-77.853-15.246-121.498c11.523,0.165,23.501,4.172,34.658,12.681C344.799,293.469,333.396,341.526,319.548,360.257z"
-                  })
-                ),
-                React.createElement("span", { style: { fontSize: "12px" } }, "楽譜")
-              )
-            )}
-          </div>
-          <div
-            css={css`
-              width: 33.33%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              text-decoration: none;
-              font-size: 18px;
-              &:hover {
-                background-color: #444;
-              }
-            `}
-          >
-            {React.createElement(
-              Link,
-              {
-                to: "/fretboard/",
-                style: {
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  textDecoration: "none",
-                  gap: "4px",
-                },
-              },
-              React.createElement(React.Fragment, null,
-                React.createElement("svg", {
-                  xmlns: "http://www.w3.org/2000/svg",
-                  xmlnsXlink: "http://www.w3.org/1999/xlink",
-                  viewBox: "0 0 512 512",
-                  width: "24",
-                  height: "24",
-                  style: {
-                    fill: "currentColor"
-                  }
-                },
-                  React.createElement("path", {
-                    d: "M207.882,304.111c18.384,18.392,48.197,18.392,66.589,0c18.384-18.384,18.384-48.196,0-66.581c-18.392-18.392-48.206-18.392-66.589,0C189.489,255.915,189.489,285.728,207.882,304.111z"
-                  }),
-                  React.createElement("path", {
-                    d: "M364.346,218.42l-18.136,19.034l7.674,7.665c8.708,8.708,13.002,20.001,13.011,31.404c-0.009,11.404-4.312,22.696-13.011,31.414c-6.802,6.954-19.317,12.994-30.139,16.801c-11.839,4.268-22.652,10.471-31.215,19.017c-7.324,7.297-12.953,16.493-15.382,27.093c-3.533,15.544-5.056,32.825-9.008,49.121c-3.91,16.331-9.95,31.08-21.232,42.346c-1.48,1.48-3.055,2.908-4.748,4.286c-9.384,7.648-19.137,13.122-29.42,16.219c-15.433,4.552-32.388,4.192-53.27-4.14c-20.814-8.35-45.245-25.082-73.151-53.005c-37.281-37.23-54.433-68.181-58.788-92.81c-2.207-12.371-1.42-23.294,1.652-33.603c3.088-10.291,8.572-20.044,16.219-29.428c1.386-1.702,2.815-3.276,4.303-4.764c11.258-11.275,25.989-17.315,42.32-21.224c16.305-3.943,33.577-5.466,49.121-8.999c10.6-2.438,19.805-8.058,27.102-15.373c8.538-8.572,14.731-19.368,19.008-31.224c3.815-10.831,9.83-23.338,16.793-30.147c8.708-8.7,20.001-13.003,31.412-13.012c11.412,0.009,22.696,4.303,31.404,13.012l7.682,7.682l19.026-18.136l-8.127-8.127c-27.615-27.615-72.364-27.615-99.978,0c-11.831,11.977-18.392,27.434-22.944,39.822c-3.216,8.974-7.734,16.433-12.866,21.54c-4.414,4.406-9.119,7.118-14.432,8.359c-12.789,2.993-30.668,4.61-49.318,9.051c-18.615,4.465-38.598,12.01-54.792,28.196c-2.105,2.104-4.141,4.346-6.091,6.75c-9.377,11.506-16.776,24.304-21.02,38.488c-6.441,21.266-5.337,45.305,4.928,70.61c10.249,25.382,29.232,52.338,58.805,81.92c39.42,39.377,74.28,60.164,106.746,66.076c16.185,2.926,31.635,1.916,45.793-2.344c14.175-4.243,26.973-11.635,38.496-21.027c2.387-1.933,4.62-3.969,6.715-6.066c16.186-16.202,23.748-36.178,28.206-54.793c4.44-18.658,6.065-36.546,9.068-49.352c1.24-5.295,3.944-9.983,8.35-14.414c5.115-5.132,12.575-9.649,21.532-12.874c12.413-4.543,27.845-11.121,39.822-22.944c27.614-27.623,27.614-72.363,0-99.978L364.346,218.42z"
-                  }),
-                  React.createElement("polygon", {
-                    points: "268.021,208.308 303.694,243.972 426.547,115.071 396.923,85.437"
-                  }),
-                  React.createElement("polygon", {
-                    points: "454.838,15.349 403.732,66.446 445.547,108.261 496.652,57.155"
-                  }),
-                  React.createElement("polygon", {
-                    points: "446.959,10.199 436.753,0.002 420.114,16.64 430.312,26.838"
-                  }),
-                  React.createElement("polygon", {
-                    points: "415.238,41.92 405.032,31.722 388.393,48.361 398.591,58.558"
-                  }),
-                  React.createElement("polygon", {
-                    points: "501.794,65.043 485.155,81.682 495.352,91.879 512,75.24"
-                  }),
-                  React.createElement("rect", {
-                    x: "459.642",
-                    y: "98.416",
-                    transform: "matrix(-0.7071 -0.7071 0.7071 -0.7071 719.0573 518.2056)",
-                    width: "14.422",
-                    height: "23.531"
-                  }),
-                  React.createElement("polygon", {
-                    points: "115.5,343.84 168.154,396.493 182.089,382.558 129.444,329.904"
-                  })
-                ),
-                React.createElement("span", { style: { fontSize: "12px" } }, "フレット")
-              )
-            )}
-          </div>
-          <div
-            css={css`
-              width: 33.33%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              text-decoration: none;
-              font-size: 18px;
-              &:hover {
-                background-color: #444;
-              }
-            `}
-          >
-            {React.createElement(
-              Link,
-              {
-                to: "/test/",
-                style: {
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  textDecoration: "none",
-                  gap: "4px",
-                },
-              },
-              React.createElement(React.Fragment, null,
-                React.createElement("div", {
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "3px",
-                    height: "24px",
-                  }
-                },
-                  React.createElement("svg", {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    xmlnsXlink: "http://www.w3.org/1999/xlink",
-                    viewBox: "0 0 512 512",
-                    width: "16",
-                    height: "16",
-                    style: {
-                      fill: "currentColor"
-                    }
-                  },
-                    React.createElement("path", {
-                      d: "M418.562,173.34c5.999-1.291,10.281-6.582,10.281-12.724V103.86c0-3.927-1.775-7.649-4.834-10.124c-3.058-2.466-7.07-3.425-10.912-2.6l-51.621,11.093V30.884c0-3.856-1.713-7.515-4.672-9.99c-2.964-2.475-6.869-3.507-10.662-2.816l-38.686,7.013c-6.192,1.121-10.694,6.51-10.694,12.805v78.242l-80.658,17.333V64.117c0-3.856-1.713-7.514-4.672-9.99c-2.958-2.475-6.864-3.506-10.662-2.816l-38.69,7.004c-6.192,1.12-10.693,6.511-10.693,12.806v76.25l-57.948,12.456c-5.999,1.282-10.281,6.59-10.281,12.724v56.756c0,3.927,1.776,7.649,4.834,10.124c3.062,2.466,7.07,3.426,10.917,2.601l52.478-11.281v108.39l-57.948,12.456c-5.999,1.282-10.281,6.582-10.281,12.715v56.737c0,3.928,1.776,7.649,4.834,10.125c3.062,2.466,7.07,3.425,10.917,2.6l52.478-11.281v76.492c0,3.856,1.712,7.515,4.672,9.99c2.959,2.476,6.864,3.507,10.662,2.816l38.686-6.995c6.192-1.12,10.698-6.51,10.698-12.805v-83.397l80.658-17.334v74.502c0,3.865,1.712,7.524,4.672,9.99c2.96,2.475,6.865,3.506,10.662,2.815l38.686-7.004c6.192-1.121,10.694-6.51,10.694-12.805V377.35l57.087-12.267c5.999-1.291,10.281-6.582,10.281-12.724v-56.729c0-3.927-1.775-7.649-4.834-10.124c-3.058-2.466-7.07-3.426-10.912-2.6l-51.621,11.093v-108.39L418.562,173.34z M296.761,307.906l-80.658,17.326V216.85l80.658-17.334V307.906z"
-                    }),
-                    React.createElement("path", {
-                      d: "M364.421,0.036c0.022,0,0.04,0,0.062-0.009L364.65,0L364.421,0.036z"
-                    })
-                  ),
-                  React.createElement("svg", {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    xmlnsXlink: "http://www.w3.org/1999/xlink",
-                    viewBox: "0 0 512 512",
-                    width: "16",
-                    height: "16",
-                    style: {
-                      fill: "currentColor"
-                    }
-                  },
-                    React.createElement("path", {
-                      d: "M200.438,214.712V0h-71.18v512c0,0,170.389-50.606,236.182-162.99C424.052,248.893,324.927,139.024,200.438,214.712z M300.508,302.609c-6.37,82.823-100.117,126.984-100.117,126.984v-156.27C239.449,239.14,305.394,239.14,300.508,302.609z"
-                    })
-                  )
-                ),
-                React.createElement("span", { style: { fontSize: "12px" } }, "設定")
-              )
-            )}
-          </div>
-        </div>
-      </div>
-      </BrowserRouter>
+          <BrowserRouter>
+            <div
+              css={css`
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+              `}
+            >
+              <div
+                css={css`
+                  width: 100%;
+                  flex: 1;
+                  overflow-y: auto;
+                  overflow-x: hidden;
+                  min-height: 0;
+                `}
+              >
+                <Routes>
+                  <Route path={`/`} element={<SheetPage />} />
+                  <Route path={`/sheet/`} element={<SheetPage />} />
+                  <Route path={`/settings/`} element={<SettingsPage />} />
+                  <Route path={`/fretboard/`} element={<FretboardPage />} />
+                </Routes>
+              </div>
+              <NavigationBar />
+            </div>
+          </BrowserRouter>
         </TuningProvider>
       </KeySignatureProvider>
     </GuitarNotesProvider>

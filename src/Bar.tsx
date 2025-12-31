@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css, SerializedStyles } from "@emotion/react";
 import { useRef, useEffect } from 'react';
+import { AccidentalIcon } from './components/AccidentalIcon';
 
 interface Coordinates {
   x: number;
@@ -55,114 +56,29 @@ function Bar(props: BarProps) {
       {/* 調号記号の表示 */}
       {props.showKeySignatureSharp && (
         <div css={getKeySignatureSharpStyle(props.keySignatureIndex ?? 0)}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 136 464"
-            css={css`
-              width: 100%;
-              height: 100%;
-            `}
-          >
-            <image
-              href="/images/sharp.png"
-              x="0"
-              y="0"
-              width="136"
-              height="464"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
+          <AccidentalIcon type="sharp" size={60} />
         </div>
       )}
       {props.showKeySignatureFlat && (
         <div css={getKeySignatureFlatStyle(props.keySignatureIndex ?? 0)}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 136 464"
-            css={css`
-              width: 100%;
-              height: 100%;
-            `}
-          >
-            <image
-              href="/images/flat.png"
-              x="0"
-              y="0"
-              width="136"
-              height="464"
-              preserveAspectRatio="xMidYMid meet"
-            />
-          </svg>
+          <AccidentalIcon type="flat" size={60} />
         </div>
       )}
       {props.isInputted && props.noteNumber !== null && (
         <>
           {props.isSharp && (
             <div css={getSharpStyle(props.horizontalOffset)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 136 464"
-                css={css`
-                  width: 100%;
-                  height: 100%;
-                `}
-              >
-                <image
-                  href="/images/sharp.png"
-                  x="0"
-                  y="0"
-                  width="136"
-                  height="464"
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </svg>
+              <AccidentalIcon type="sharp" size={60} />
             </div>
           )}
           {props.isFlat && (
             <div css={getFlatStyle(props.horizontalOffset)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 136 464"
-                css={css`
-                  width: 100%;
-                  height: 100%;
-                `}
-              >
-                <image
-                  href="/images/flat.png"
-                  x="0"
-                  y="0"
-                  width="136"
-                  height="464"
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </svg>
+              <AccidentalIcon type="flat" size={60} />
             </div>
           )}
           {props.isNatural && (
             <div css={getNaturalStyle(props.horizontalOffset)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 136 464"
-                css={css`
-                  width: 100%;
-                  height: 100%;
-                `}
-              >
-                <image
-                  href="/images/natural.png"
-                  x="0"
-                  y="0"
-                  width="136"
-                  height="464"
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </svg>
+              <AccidentalIcon type="natural" size={60} />
             </div>
           )}
           <div css={getNoteEllipseStyle(props.horizontalOffset)}>
@@ -178,12 +94,9 @@ const selected = css`
   background-color: #F99;
 `
 
-const getSharpStyle = (offset: number = 0) => css`
+const accidentalBaseStyle = (offset: number = 0) => css`
   position: absolute;
   left: calc(70% - 25px - 60px - 8px + ${offset}px);
-  top: 50%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
   width: 60px;
   height: 65px;
   z-index: 201;
@@ -192,38 +105,27 @@ const getSharpStyle = (offset: number = 0) => css`
   justify-content: center;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
+`;
+
+const getSharpStyle = (offset: number = 0) => css`
+  ${accidentalBaseStyle(offset)};
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
 `;
 
 const getFlatStyle = (offset: number = 0) => css`
-  position: absolute;
-  left: calc(70% - 25px - 60px - 8px + ${offset}px);
+  ${accidentalBaseStyle(offset)};
   top: 50%;
   transform: translateY(calc(-50% - 12px));
   -webkit-transform: translateY(calc(-50% - 12px));
-  width: 60px;
-  height: 65px;
-  z-index: 201;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
 `;
 
 const getNaturalStyle = (offset: number = 0) => css`
-  position: absolute;
-  left: calc(70% - 25px - 60px - 8px + ${offset}px);
+  ${accidentalBaseStyle(offset)};
   top: 50%;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
-  width: 60px;
-  height: 65px;
-  z-index: 201;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
 `;
 
 const getNoteEllipseStyle = (offset: number = 0) => css`
@@ -253,14 +155,10 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   padding: 0;
 `;
 
-// 調号のシャープ記号のスタイル
-// ト音記号の右側、固定位置に表示
-const getKeySignatureSharpStyle = (index: number = 0) => css`
+// 調号記号のベーススタイル
+const keySignatureBaseStyle = (index: number = 0) => css`
   position: absolute;
   left: calc(85px + ${index * 10}px);
-  top: 50%;
-  transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
   width: 60px;
   height: 65px;
   z-index: 60;
@@ -271,22 +169,22 @@ const getKeySignatureSharpStyle = (index: number = 0) => css`
   -webkit-box-sizing: border-box;
 `;
 
+// 調号のシャープ記号のスタイル
+// ト音記号の右側、固定位置に表示
+const getKeySignatureSharpStyle = (index: number = 0) => css`
+  ${keySignatureBaseStyle(index)};
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+`;
+
 // 調号のフラット記号のスタイル
 // ト音記号の右側、固定位置に表示
 const getKeySignatureFlatStyle = (index: number = 0) => css`
-  position: absolute;
-  left: calc(85px + ${index * 10}px);
+  ${keySignatureBaseStyle(index)};
   top: 50%;
   transform: translateY(calc(-50% - 12px));
   -webkit-transform: translateY(calc(-50% - 12px));
-  width: 60px;
-  height: 65px;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
 `;
 
 export default Bar;

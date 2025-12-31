@@ -5,6 +5,8 @@ import ControlPanel from "./components/ControlPanel";
 import { useSheetPage } from "./hooks/useSheetPage";
 import { useKeySignature } from "./contexts/KeySignatureContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "./utils/keySignature";
+import { calculateNoteOffset } from "./utils/noteUtils";
+import { ModeBadge } from "./components/ModeBadge";
 import {
   sheetWrapper,
   whiteBarWrapperCss,
@@ -36,54 +38,6 @@ function SheetPage() {
   } = useSheetPage();
   
   const { selectedKeySignature } = useKeySignature();
-
-  // 連続する音符のグループを検出し、各音符のオフセットを計算
-  const calculateOffset = (noteNum: number): number => {
-    if (inputtedNoteNumbers.length === 0) return 0;
-    
-    // 入力された音符を数値に変換してソート（シャープ記号、フラット記号、ナチュラル記号を除去してからparseInt）
-    const inputtedNums = inputtedNoteNumbers
-      .map(n => parseInt(n.replace('#', '').replace('b', '').replace('n', ''), 10))
-      .filter(n => !isNaN(n))
-      .sort((a, b) => a - b);
-    
-    // 現在の音符が入力されているかチェック
-    if (!inputtedNums.includes(noteNum)) return 0;
-    
-    // 連続するグループを見つける
-    const groups: number[][] = [];
-    let currentGroup: number[] = [inputtedNums[0]];
-    
-    for (let i = 1; i < inputtedNums.length; i++) {
-      if (inputtedNums[i] === inputtedNums[i - 1] + 1) {
-        // 連続している
-        currentGroup.push(inputtedNums[i]);
-      } else {
-        // 連続が途切れた
-        groups.push(currentGroup);
-        currentGroup = [inputtedNums[i]];
-      }
-    }
-    groups.push(currentGroup);
-    
-    // 現在の音符が属するグループを見つける
-    const group = groups.find(g => g.includes(noteNum));
-    if (!group) return 0;
-    
-    // グループの長さが1の場合はオフセットなし
-    if (group.length === 1) return 0;
-    
-    // グループ内での位置を取得（0から始まるインデックス）
-    const indexInGroup = group.indexOf(noteNum);
-    
-    // インデックスが奇数の場合（2番目、4番目、6番目...）は左にずらす
-    // インデックスが偶数の場合（1番目、3番目、5番目...）は中央
-    if (indexInGroup % 2 === 1) {
-      return -35;
-    } else {
-      return 0;
-    }
-  };
 
   const handleClearSelection = () => {
     setSelectedNote(null);
@@ -143,123 +97,9 @@ function SheetPage() {
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={onEnter}
     >
-      {isSharpMode && (
-        <div
-          css={css`
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            -webkit-transform: translateX(-50%);
-            background-color: rgba(74, 144, 226, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 200;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            pointer-events: none;
-            animation: fadeIn 0.2s ease;
-            
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-10px);
-                -webkit-transform: translateX(-50%) translateY(-10px);
-              }
-              to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-                -webkit-transform: translateX(-50%) translateY(0);
-              }
-            }
-          `}
-        >
-          <span>#</span>
-          <span>シャープモード</span>
-        </div>
-      )}
-      {isFlatMode && (
-        <div
-          css={css`
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(74, 144, 226, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 200;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            pointer-events: none;
-            animation: fadeIn 0.2s ease;
-            
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-10px);
-              }
-              to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-              }
-            }
-          `}
-        >
-          <span>♭</span>
-          <span>フラットモード</span>
-        </div>
-      )}
-      {isNaturalMode && (
-        <div
-          css={css`
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            -webkit-transform: translateX(-50%);
-            background-color: rgba(74, 144, 226, 0.9);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 200;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            pointer-events: none;
-            animation: fadeIn 0.2s ease;
-            
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-10px);
-                -webkit-transform: translateX(-50%) translateY(-10px);
-              }
-              to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-                -webkit-transform: translateX(-50%) translateY(0);
-              }
-            }
-          `}
-        >
-          <span>♮</span>
-          <span>ナチュラルモード</span>
-        </div>
-      )}
+      {isSharpMode && <ModeBadge label="シャープモード" symbol="#" />}
+      {isFlatMode && <ModeBadge label="フラットモード" symbol="♭" />}
+      {isNaturalMode && <ModeBadge label="ナチュラルモード" symbol="♮" />}
       <div
         css={[
           sheetWrapper,
@@ -323,7 +163,7 @@ function SheetPage() {
           
           // 連続する音符のグループを考慮してオフセットを計算
           const currentNoteNum = 23 - i;
-          const horizontalOffset = calculateOffset(currentNoteNum);
+          const horizontalOffset = calculateNoteOffset(currentNoteNum, inputtedNoteNumbers);
           
           // 調号記号の情報を取得
           let showKeySignatureSharp = false;

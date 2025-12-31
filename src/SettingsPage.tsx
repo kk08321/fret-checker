@@ -4,7 +4,7 @@ import { useKeySignature } from "./contexts/KeySignatureContext";
 import { KEY_SIGNATURE_LIST, KeySignatureType } from "./utils/keySignature";
 import { useTuning, TuningType } from "./contexts/TuningContext";
 
-export default function Test() {
+export default function SettingsPage() {
   const { selectedKeySignature, setSelectedKeySignature } = useKeySignature();
   const { tuning, setTuning } = useTuning();
 
@@ -134,3 +134,4 @@ export default function Test() {
     </div>
   );
 }
+
