@@ -45,12 +45,30 @@ export const guitarOpenStrings = [
   40, // 6弦 E2
 ];
 
+// チューニングタイプに応じた開放弦のMIDIノート番号を取得
+export const getGuitarOpenStrings = (tuning: "normal" | "dropD" = "normal"): number[] => {
+  if (tuning === "dropD") {
+    // ドロップDチューニング：6弦を全音（2半音）下げる
+    return [
+      64, // 1弦 E4
+      59, // 2弦 B3
+      55, // 3弦 G3
+      50, // 4弦 D3
+      45, // 5弦 A2
+      38, // 6弦 D2 (E2から2半音下げる)
+    ];
+  }
+  // ノーマルチューニング
+  return guitarOpenStrings;
+};
+
 // MIDIノート番号からギター押弦箇所を取得
-export const getGuitarPositions = (midi: number): Array<{ string: number; fret: number }> => {
+export const getGuitarPositions = (midi: number, tuning: "normal" | "dropD" = "normal"): Array<{ string: number; fret: number }> => {
   const positions: Array<{ string: number; fret: number }> = [];
+  const openStrings = getGuitarOpenStrings(tuning);
   
-  for (let i = 0; i < guitarOpenStrings.length; i++) {
-    const openStringMidi = guitarOpenStrings[i];
+  for (let i = 0; i < openStrings.length; i++) {
+    const openStringMidi = openStrings[i];
     const fret = midi - openStringMidi;
     
     // フレットが0以上19以下（クラシックギターのフレット範囲）の場合に追加
@@ -63,7 +81,7 @@ export const getGuitarPositions = (midi: number): Array<{ string: number; fret: 
 };
 
 // 音符番号をギター押弦箇所の文字列に変換
-export const convertNoteToGuitarPositions = (noteNumStr: string): string => {
+export const convertNoteToGuitarPositions = (noteNumStr: string, tuning: "normal" | "dropD" = "normal"): string => {
   // シャープ記号とフラット記号が付いているかチェック
   const isSharp = noteNumStr.endsWith('#');
   const isFlat = noteNumStr.endsWith('b');
@@ -119,7 +137,7 @@ export const convertNoteToGuitarPositions = (noteNumStr: string): string => {
     octave = oct;
   }
   
-  const positions = getGuitarPositions(midi);
+  const positions = getGuitarPositions(midi, tuning);
 
   if (positions.length === 0) {
     return `${displayJapaneseName} ${displayNoteName}${octave} (押弦不可)`;

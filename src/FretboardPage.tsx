@@ -1,10 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { useGuitarNotes } from "./contexts/GuitarNotesContext";
-import { noteNumberToMidi, getGuitarPositions } from "./utils/midi";
+import { useTuning } from "./contexts/TuningContext";
+import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
 
 function FretboardPage() {
   const { inputtedNoteNumbers } = useGuitarNotes();
+  const { tuning } = useTuning();
 
   // デバッグ用：inputtedNoteNumbersを確認
   console.log("FretboardPage - inputtedNoteNumbers:", inputtedNoteNumbers);
@@ -19,7 +21,7 @@ function FretboardPage() {
       if (isNaN(noteNum)) return;
       
       const midi = noteNumberToMidi(noteNum);
-      const guitarPositions = getGuitarPositions(midi);
+      const guitarPositions = getGuitarPositions(midi, tuning);
       
       // すべての押弦箇所を追加
       guitarPositions.forEach((position) => {
@@ -58,6 +60,13 @@ function FretboardPage() {
 
   const fretPositions = getFretPositions();
   const strings = [6, 5, 4, 3, 2, 1]; // 6弦から1弦（ギターの標準的な表示順）
+  
+  // 各弦の開放弦の音名を取得
+  const openStrings = getGuitarOpenStrings(tuning);
+  const stringTunings = openStrings.map(midi => {
+    const { noteName } = midiToNoteName(midi);
+    return noteName;
+  });
 
   return (
     <div
@@ -79,55 +88,101 @@ function FretboardPage() {
       <div
         css={css`
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           align-items: flex-start;
           width: 100%;
           max-width: 100%;
         `}
       >
-        {/* フレット番号のヘッダー（左側、縦方向、茶色背景の外側） */}
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            margin-right: 5px;
-          `}
-        >
-          {frets.map((fret) => (
-            <div
-              key={fret}
-              css={css`
-                min-height: ${fretHeights[fret]}px;
-                height: ${fretHeights[fret]}px;
-                min-width: 30px;
-                width: 30px;
-                text-align: center;
-                font-size: 11px;
-                font-weight: bold;
-                color: #333;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-              `}
-            >
-              {fret === 0 ? "開放" : fret}
-            </div>
-          ))}
-        </div>
-
-        {/* 黒檀のフレットボード（ネック部分） */}
+        {/* チューニング表示（フレットボードの上、枠外） */}
         <div
           css={css`
             display: flex;
             flex-direction: row;
-            background-color: #1a1a1a;
-            border: 3px solid #0d0d0d;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            flex-shrink: 0;
+            margin-bottom: 15px;
+            position: relative;
           `}
         >
+          {strings.map((stringNum, index) => {
+            // フレット番号ヘッダーの左端から最初の弦の中心までの距離を計算
+            // ヘッダー幅(30px) + マージン(5px) + フレットボードのボーダー(3px) + 弦の中心位置(14px) = 52px
+            // 各弦は28px間隔で並んでいるので、index * 28pxを追加
+            const baseOffset = 30 + 5 + 3 + 14; // 52px
+            const stringOffset = 28 * index;
+            const leftOffset = baseOffset + stringOffset;
+            return (
+              <div
+                key={stringNum}
+                css={css`
+                  position: absolute;
+                  left: ${leftOffset}px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 12px;
+                  font-weight: bold;
+                  color: #333;
+                  transform: translateX(-50%);
+                `}
+              >
+                {stringTunings[strings.length - 1 - index]}
+              </div>
+            );
+          })}
+        </div>
+
+        <div
+          css={css`
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 100%;
+          `}
+        >
+          {/* フレット番号のヘッダー（左側、縦方向、茶色背景の外側） */}
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              margin-right: 5px;
+            `}
+          >
+            {frets.map((fret) => (
+              <div
+                key={fret}
+                css={css`
+                  min-height: ${fretHeights[fret]}px;
+                  height: ${fretHeights[fret]}px;
+                  min-width: 30px;
+                  width: 30px;
+                  text-align: center;
+                  font-size: 11px;
+                  font-weight: bold;
+                  color: #333;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  flex-shrink: 0;
+                `}
+              >
+                {fret === 0 ? "開放" : fret}
+              </div>
+            ))}
+          </div>
+
+          {/* 黒檀のフレットボード（ネック部分） */}
+          <div
+            css={css`
+              display: flex;
+              flex-direction: row;
+              background-color: #1a1a1a;
+              border: 3px solid #0d0d0d;
+              border-radius: 8px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+              flex-shrink: 0;
+            `}
+          >
           {/* 各弦（横方向に並ぶ） */}
           <div
             css={css`
@@ -237,6 +292,7 @@ function FretboardPage() {
             </div>
           ))}
           </div>
+        </div>
         </div>
       </div>
 

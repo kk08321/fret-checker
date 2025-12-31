@@ -7,11 +7,13 @@ import Test from "./Test";
 import FretboardPage from "./FretboardPage";
 import { GuitarNotesProvider } from "./contexts/GuitarNotesContext";
 import { KeySignatureProvider } from "./contexts/KeySignatureContext";
+import { TuningProvider } from "./contexts/TuningContext";
 
 function App() {
   return (
     <GuitarNotesProvider>
       <KeySignatureProvider>
+        <TuningProvider>
         <BrowserRouter>
       <div
         css={css`
@@ -255,6 +257,7 @@ function App() {
         </div>
       </div>
       </BrowserRouter>
+        </TuningProvider>
       </KeySignatureProvider>
     </GuitarNotesProvider>
   );

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { convertNoteToGuitarPositions } from "../utils/midi";
 import { useGuitarNotes } from "../contexts/GuitarNotesContext";
 import { useKeySignature } from "../contexts/KeySignatureContext";
+import { useTuning } from "../contexts/TuningContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
 
 interface Coordinates {
@@ -18,9 +19,10 @@ export const useSheetPage = () => {
   const [isNaturalMode, setIsNaturalMode] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { selectedKeySignature } = useKeySignature();
+  const { tuning } = useTuning();
   
   // inputtedNoteNumbersから動的にnotesを計算
-  const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr));
+  const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr, tuning));
   
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const controlWrapperRef = useRef<HTMLDivElement>(null);
