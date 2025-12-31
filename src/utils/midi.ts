@@ -53,8 +53,8 @@ export const getGuitarPositions = (midi: number): Array<{ string: number; fret: 
     const openStringMidi = guitarOpenStrings[i];
     const fret = midi - openStringMidi;
     
-    // フレットが0以上24以下（ギターのフレット範囲）の場合に追加
-    if (fret >= 0 && fret <= 24) {
+    // フレットが0以上19以下（クラシックギターのフレット範囲）の場合に追加
+    if (fret >= 0 && fret <= 19) {
       positions.push({ string: i + 1, fret: fret });
     }
   }

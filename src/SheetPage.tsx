@@ -78,6 +78,10 @@ function SheetPage() {
       css={css`
         width: 100%;
         height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 60px;
+        box-sizing: border-box;
       `}
       onTouchStart={setCoordinatesByTouchEvent}
       onTouchMove={setCoordinatesByTouchEvent}

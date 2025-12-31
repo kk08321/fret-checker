@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { convertNoteToGuitarPositions } from "../utils/midi";
+import { useGuitarNotes } from "../contexts/GuitarNotesContext";
 
 interface Coordinates {
   x: number;
@@ -10,8 +11,10 @@ export const useSheetPage = () => {
   const [touchCoordinates, setTouchCoordinates] = useState<Coordinates | null>(null);
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
-  const [notes, setNotes] = useState<string[]>([]);
-  const [inputtedNoteNumbers, setInputtedNoteNumbers] = useState<string[]>([]);
+  const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
+  
+  // inputtedNoteNumbersから動的にnotesを計算
+  const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr));
   
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const controlWrapperRef = useRef<HTMLDivElement>(null);
@@ -65,19 +68,16 @@ export const useSheetPage = () => {
       }
     }
 
-    let notesCopy: string[] = [];
     let noteNumbersCopy: string[] = [];
-    if (notes.length < 6) {
-      notesCopy = [...notes];
+    if (inputtedNoteNumbers.length < 6) {
       noteNumbersCopy = [...inputtedNoteNumbers];
     }
     if (selectedNote !== null) {
-      const guitarPosition = convertNoteToGuitarPositions(selectedNote);
-      notesCopy.push(guitarPosition);
       noteNumbersCopy.push(selectedNote);
     }
-    setNotes(notesCopy);
+    // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
+    console.log("useSheetPage - updating inputtedNoteNumbers:", noteNumbersCopy);
     setTouchCoordinates({ x: 0, y: -100 });
   };
 
