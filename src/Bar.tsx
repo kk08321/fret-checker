@@ -13,6 +13,9 @@ interface BarProps {
   coordinates: Coordinates | null;
   wrapperCss: SerializedStyles;
   barCss: SerializedStyles;
+  isInputted: boolean;
+  noteNumber: number | null;
+  horizontalOffset?: number;
 }
 
 const getHighlighted = (targetRef: React.RefObject<HTMLDivElement>, coordinates: Coordinates | null): boolean => {
@@ -43,12 +46,39 @@ function Bar(props: BarProps) {
   return (
     <div css={props.wrapperCss} ref={targetRef}>
       <div css={[props.barCss, highlighted ? selected : null]}></div>
+      {props.isInputted && props.noteNumber !== null && (
+        <div css={getNoteEllipseStyle(props.horizontalOffset)}>
+          {props.noteNumber}
+        </div>
+      )}
     </div>
   );
 }
 
 const selected = css`
-  background-color: #FF6666;
+  background-color: #FBB;
 `
+
+const getNoteEllipseStyle = (offset: number = 0) => css`
+  position: absolute;
+  left: calc(70% - 25px + ${offset}px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #EEE 0%, #999 50%, #BBB 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 
+    0 3px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  z-index: 200;
+`;
 
 export default Bar;

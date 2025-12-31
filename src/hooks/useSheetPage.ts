@@ -11,6 +11,7 @@ export const useSheetPage = () => {
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [sheetWrapperHeight, setSheetWrapperHeight] = useState(0);
   const [notes, setNotes] = useState<string[]>([]);
+  const [inputtedNoteNumbers, setInputtedNoteNumbers] = useState<string[]>([]);
   
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const controlWrapperRef = useRef<HTMLDivElement>(null);
@@ -65,14 +66,18 @@ export const useSheetPage = () => {
     }
 
     let notesCopy: string[] = [];
+    let noteNumbersCopy: string[] = [];
     if (notes.length < 6) {
       notesCopy = [...notes];
+      noteNumbersCopy = [...inputtedNoteNumbers];
     }
     if (selectedNote !== null) {
       const guitarPosition = convertNoteToGuitarPositions(selectedNote);
       notesCopy.push(guitarPosition);
+      noteNumbersCopy.push(selectedNote);
     }
     setNotes(notesCopy);
+    setInputtedNoteNumbers(noteNumbersCopy);
     setTouchCoordinates({ x: 0, y: -100 });
   };
 
@@ -82,6 +87,7 @@ export const useSheetPage = () => {
     setSelectedNote,
     sheetWrapperHeight,
     notes,
+    inputtedNoteNumbers,
     pageWrapperRef,
     controlWrapperRef,
     setCoordinatesByTouchEvent,
