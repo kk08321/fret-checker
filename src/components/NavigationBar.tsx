@@ -111,11 +111,10 @@ export const NavigationBar = () => {
       `}
     >
       {navItems.map((item) => {
-        const LinkComponent = Link as React.ComponentType<React.ComponentProps<typeof Link>>;
+        const LinkComponent = Link as any;
         return (
-          <LinkComponent
+          <div
             key={item.path}
-            to={item.path}
             css={css`
               width: 33.33%;
               display: flex;
@@ -123,7 +122,6 @@ export const NavigationBar = () => {
               align-items: center;
               justify-content: center;
               color: white;
-              text-decoration: none;
               font-size: 18px;
               gap: 4px;
               &:hover {
@@ -131,9 +129,24 @@ export const NavigationBar = () => {
               }
             `}
           >
-            {item.icon}
-            <span style={{ fontSize: "12px" }}>{item.label}</span>
-          </LinkComponent>
+            <LinkComponent
+              to={item.path}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                textDecoration: "none",
+                gap: "4px",
+              }}
+            >
+              {item.icon}
+              <span style={{ fontSize: "12px" }}>{item.label}</span>
+            </LinkComponent>
+          </div>
         );
       })}
     </div>
