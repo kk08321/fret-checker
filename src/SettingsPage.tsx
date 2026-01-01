@@ -106,7 +106,7 @@ export default function SettingsPage() {
                 }
               `}
             >
-              <option value="">選択しない</option>
+              <option value="">なし</option>
               {KEY_SIGNATURE_LIST.map((keySig) => (
                 <option key={keySig.type} value={keySig.type}>
                   {keySig.displayName}

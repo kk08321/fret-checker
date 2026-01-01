@@ -30,6 +30,43 @@ const parseNoteString = (noteStr: string): ParsedNote | null => {
   return { noteName, positions };
 };
 
+/**
+ * フレット番号からパステルカラーのヒートマップ色を計算
+ * FretboardPageのgetFretColorをベースに、パステルカラー版に変換
+ * 開放（0）: パステルグリーン
+ * 19フレット: パステルイエロー
+ */
+const getPastelFretColor = (fret: number): string => {
+  const NUM_FRETS = 20;
+  // 0から19の範囲で0.0（緑）から1.0（黄）に正規化
+  const linearRatio = fret / (NUM_FRETS - 1);
+  
+  // 序盤で黄色成分が早く増えるように、2.5乗関数を使用
+  const ratio = Math.pow(linearRatio, 0.45);
+  
+  // 元の色（FretboardPageと同じ）
+  const greenR = 34;
+  const greenG = 197;
+  const greenB = 94;
+  const yellowR = 255;
+  const yellowG = 220;
+  const yellowB = 0;
+  
+  // 非線形補間
+  const r = Math.round(greenR + (yellowR - greenR) * ratio);
+  const g = Math.round(greenG + (yellowG - greenG) * ratio);
+  const b = Math.round(greenB + (yellowB - greenB) * ratio);
+  
+  // パステルカラーにするため、白（255, 255, 255）と60:40の比率で混ぜる
+  const whiteRatio = 0.4;
+  const colorRatio = 0.6;
+  const pastelR = Math.round(r * colorRatio + 255 * whiteRatio);
+  const pastelG = Math.round(g * colorRatio + 255 * whiteRatio);
+  const pastelB = Math.round(b * colorRatio + 255 * whiteRatio);
+  
+  return `rgb(${pastelR}, ${pastelG}, ${pastelB})`;
+};
+
 interface ControlPanelProps {
   notes: string[];
   controlWrapperRef: React.RefObject<HTMLDivElement>;
@@ -744,28 +781,35 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
                     align-items: center;
                   `}
                 >
-                  {parsed.positions.map((pos, posIndex) => (
-                    <span
-                      key={posIndex}
-                      css={css`
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        height: 20px;
-                        padding: 0 6px;
-                        background: rgba(0, 0, 0, 0.06);
-                        border-radius: 4px;
-                        font-size: 11px;
-                        color: rgba(0, 0, 0, 0.7);
-                        white-space: nowrap;
-                        font-variant-numeric: tabular-nums;
-                        letter-spacing: 0.02em;
-                        box-sizing: border-box;
-                      `}
-                    >
-                      {pos}
-                    </span>
-                  ))}
+                  {parsed.positions.map((pos, posIndex) => {
+                    // 押弦位置の文字列からフレット番号を抽出（例: "1弦2F" -> 2）
+                    const fretMatch = pos.match(/(\d+)F/);
+                    const fret = fretMatch ? parseInt(fretMatch[1], 10) : 0;
+                    const backgroundColor = getPastelFretColor(fret);
+                    
+                    return (
+                      <span
+                        key={posIndex}
+                        css={css`
+                          display: inline-flex;
+                          align-items: center;
+                          justify-content: center;
+                          height: 20px;
+                          padding: 0 6px;
+                          background: ${backgroundColor};
+                          border-radius: 4px;
+                          font-size: 11px;
+                          color: rgba(0, 0, 0, 0.7);
+                          white-space: nowrap;
+                          font-variant-numeric: tabular-nums;
+                          letter-spacing: 0.02em;
+                          box-sizing: border-box;
+                        `}
+                      >
+                        {pos}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
               

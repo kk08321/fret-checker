@@ -13,30 +13,30 @@ const NUM_FRETS = 20;
 /**
  * フレット番号からヒートマップ色を計算
  * 開放（0）: 緑
- * 19フレット: 赤
- * 序盤のフレットで赤成分が早く増えるように非線形補間を使用
+ * 19フレット: 黄
+ * 序盤のフレットで黄色成分が早く増えるように非線形補間を使用
  */
 const getFretColor = (fret: number): string => {
-  // 0から19の範囲で0.0（緑）から1.0（赤）に正規化
+  // 0から19の範囲で0.0（緑）から1.0（黄）に正規化
   const linearRatio = fret / (NUM_FRETS - 1);
   
-  // 序盤で赤成分が早く増えるように、2.5乗関数を使用
+  // 序盤で黄色成分が早く増えるように、2.5乗関数を使用
   // これにより、フレットの物理的な幅の違いを視覚的に補正
   const ratio = Math.pow(linearRatio, 0.45);
   
   // 緑色: rgb(34, 197, 94) - 見やすい緑
-  // 赤色: rgb(239, 68, 68) - 見やすい赤
+  // 黄色: rgb(255, 220, 0) - 見やすい黄
   const greenR = 34;
   const greenG = 197;
   const greenB = 94;
-  const redR = 239;
-  const redG = 68;
-  const redB = 68;
+  const yellowR = 255;
+  const yellowG = 220;
+  const yellowB = 0;
   
   // 非線形補間
-  const r = Math.round(greenR + (redR - greenR) * ratio);
-  const g = Math.round(greenG + (redG - greenG) * ratio);
-  const b = Math.round(greenB + (redB - greenB) * ratio);
+  const r = Math.round(greenR + (yellowR - greenR) * ratio);
+  const g = Math.round(greenG + (yellowG - greenG) * ratio);
+  const b = Math.round(greenB + (yellowB - greenB) * ratio);
   
   return `rgb(${r}, ${g}, ${b})`;
 };
@@ -122,7 +122,7 @@ function FretboardPage() {
         justify-content: flex-start;
         padding: 10px;
         padding-top: 60px;
-        padding-bottom: 65px;
+        padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
         box-sizing: border-box;
         overflow-y: auto;
         overflow-x: hidden;
@@ -332,7 +332,7 @@ function FretboardPage() {
                           display: flex;
                           align-items: center;
                           justify-content: center;
-                          color: white;
+                          color: black;
                           font-size: 11px;
                           font-weight: bold;
                           box-shadow: 
