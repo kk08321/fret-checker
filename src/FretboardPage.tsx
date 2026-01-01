@@ -24,7 +24,7 @@ function FretboardPage() {
   } = useMeasure();
 
   /**
-   * currentMeasureIndexが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
+   * currentMeasureIndexまたはmeasuresが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
    * FretboardPageで小節を切り替えた際に、その小節の音符を表示するために呼ばれる
    * SheetPageとFretboardPageで同じ小節情報を共有するため、どちらのページで小節を切り替えても
    * もう一方のページでも反映される
@@ -33,8 +33,7 @@ function FretboardPage() {
     if (measures[currentMeasureIndex] !== undefined) {
       setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMeasureIndex]);
+  }, [currentMeasureIndex, measures]);
 
   // 各音符から押弦箇所を計算
   const getFretPositions = () => {

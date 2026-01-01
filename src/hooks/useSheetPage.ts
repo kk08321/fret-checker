@@ -204,7 +204,7 @@ export const useSheetPage = () => {
   }, [inputtedNoteNumbers]);
 
   /**
-   * currentMeasureIndexが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
+   * currentMeasureIndexまたはmeasuresが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
    * 小節を切り替えた際に、その小節の音符を表示するために呼ばれる
    */
   useEffect(() => {
@@ -213,8 +213,7 @@ export const useSheetPage = () => {
       setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
       isUpdatingFromMeasureRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentMeasureIndex]);
+  }, [currentMeasureIndex, measures]);
 
   /**
    * 現在の小節を保存して新規小節を作成

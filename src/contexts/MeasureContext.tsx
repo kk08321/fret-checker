@@ -34,6 +34,9 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   // updateCurrentMeasure内で最新のインデックスを参照するため
   useEffect(() => {
     currentMeasureIndexRef.current = currentMeasureIndex;
+    // インデックス変更後は、isLoadingMeasureRefをfalseに戻す
+    // これにより、次の更新からupdateCurrentMeasureが正常に動作する
+    isLoadingMeasureRef.current = false;
   }, [currentMeasureIndex]);
 
   /**
@@ -65,7 +68,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
     setMeasures(newMeasures);
     isLoadingMeasureRef.current = true;
     setCurrentMeasureIndex(newMeasures.length - 1); // 新規小節に移動
-    isLoadingMeasureRef.current = false;
+    // useEffectでisLoadingMeasureRef.currentがfalseに戻される
   };
 
   /**
@@ -74,31 +77,41 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
    * 削除後は適切な小節に移動する
    */
   const deleteCurrentMeasure = () => {
-    // 小節が1つだけの場合は削除しない（空の小節を1つ残す）
-    if (measures.length <= 1) {
-      return;
-    }
-
     isLoadingMeasureRef.current = true;
-    const newMeasures = [...measures];
-    newMeasures.splice(currentMeasureIndex, 1); // 現在の小節を削除
+    const currentIndex = currentMeasureIndexRef.current;
     
-    // 削除後のインデックスを決定
-    let newIndex: number;
-    if (currentMeasureIndex === measures.length - 1) {
-      // 最後の小節を削除した場合は、新しい最後の小節に移動
-      newIndex = newMeasures.length - 1;
-    } else {
-      // それ以外の場合は、前の小節に移動（インデックスを1つ減らす）
-      newIndex = currentMeasureIndex - 1;
-      if (newIndex < 0) {
-        newIndex = 0;
+    // 関数型更新を使用して最新のmeasuresを確実に参照
+    setMeasures(prevMeasures => {
+      // 小節が1つだけの場合は削除しない（空の小節を1つ残す）
+      if (prevMeasures.length <= 1) {
+        isLoadingMeasureRef.current = false;
+        return prevMeasures;
       }
-    }
-    
-    setMeasures(newMeasures);
-    setCurrentMeasureIndex(newIndex);
-    isLoadingMeasureRef.current = false;
+
+      const newMeasures = [...prevMeasures];
+      newMeasures.splice(currentIndex, 1); // 現在の小節を削除
+      
+      // 削除後のインデックスを決定
+      let newIndex: number;
+      if (currentIndex === prevMeasures.length - 1) {
+        // 最後の小節を削除した場合は、新しい最後の小節に移動
+        newIndex = newMeasures.length - 1;
+      } else if (currentIndex === 0) {
+        // 最初の小節を削除した場合は、削除後もインデックス0に移動
+        // （元の2小節目が新しい1小節目になる）
+        newIndex = 0;
+      } else {
+        // 中間の小節を削除した場合は、同じインデックスに移動
+        // （削除により、そのインデックスの内容は次の小節の内容になる）
+        newIndex = currentIndex;
+      }
+      
+      // インデックスを更新（React 18では自動的にバッチ処理される）
+      // コールバック内で呼び出すことで、measuresとcurrentMeasureIndexが同期して更新される
+      setCurrentMeasureIndex(newIndex);
+      
+      return newMeasures;
+    });
   };
 
   /**
@@ -111,12 +124,12 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
       isLoadingMeasureRef.current = true;
       const targetIndex = currentMeasureIndex - 1;
       setCurrentMeasureIndex(targetIndex);
-      isLoadingMeasureRef.current = false;
+      // useEffectでisLoadingMeasureRef.currentがfalseに戻される
     } else if (direction === 'next' && currentMeasureIndex < measures.length - 1) {
       isLoadingMeasureRef.current = true;
       const targetIndex = currentMeasureIndex + 1;
       setCurrentMeasureIndex(targetIndex);
-      isLoadingMeasureRef.current = false;
+      // useEffectでisLoadingMeasureRef.currentがfalseに戻される
     }
   };
 

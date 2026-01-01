@@ -54,36 +54,38 @@ export const MeasureBar = ({
         background-color: #444;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 10px;
         padding: 0 10px;
         box-sizing: border-box;
         z-index: 999;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
       `}
     >
-      {/* 左側：前へボタン */}
+      {/* -ボタン */}
       <button
-        onClick={handlePrevClick}
-        onTouchEnd={handlePrevClick}
-        disabled={currentMeasureIndex === 0}
+        onClick={handleDeleteClick}
+        onTouchEnd={handleDeleteClick}
+        disabled={totalMeasures <= 1}
         css={css`
           width: 40px;
           height: 40px;
           border-radius: 8px;
-          border: 2px solid #666;
-          background-color: ${currentMeasureIndex === 0 ? '#555' : '#666'};
-          color: white;
-          font-size: 18px;
-          cursor: ${currentMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
+          border: 2px solid #ef9a9a;
+          background-color: ${totalMeasures <= 1 ? '#ccc' : '#ffcdd2'};
+          color: ${totalMeasures <= 1 ? '#888' : '#c62828'};
+          font-size: 24px;
+          font-weight: bold;
+          cursor: ${totalMeasures <= 1 ? 'not-allowed' : 'pointer'};
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.2s;
           box-sizing: border-box;
-          opacity: ${currentMeasureIndex === 0 ? 0.5 : 1};
+          opacity: ${totalMeasures <= 1 ? 0.5 : 1};
           
           &:hover:not(:disabled) {
-            background-color: #777;
+            background-color: #ef9a9a;
             transform: scale(1.05);
           }
           
@@ -91,43 +93,42 @@ export const MeasureBar = ({
             transform: scale(0.95);
           }
         `}
-        title="前の小節へ"
+        title="現在の小節を削除"
       >
-        &lt;
+        −
       </button>
 
-      {/* 中央：小節数表示と+/-ボタン */}
+      {/* 前へボタン、小節数表示、次へボタンのグループ */}
       <div
         css={css`
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 4px;
         `}
       >
-        {/* -ボタン */}
+        {/* 前へボタン */}
         <button
-          onClick={handleDeleteClick}
-          onTouchEnd={handleDeleteClick}
-          disabled={totalMeasures <= 1}
+          onClick={handlePrevClick}
+          onTouchEnd={handlePrevClick}
+          disabled={currentMeasureIndex === 0}
           css={css`
             width: 40px;
             height: 40px;
             border-radius: 8px;
-            border: 2px solid #ef9a9a;
-            background-color: ${totalMeasures <= 1 ? '#ccc' : '#ffcdd2'};
-            color: ${totalMeasures <= 1 ? '#888' : '#c62828'};
-            font-size: 24px;
-            font-weight: bold;
-            cursor: ${totalMeasures <= 1 ? 'not-allowed' : 'pointer'};
+            border: 2px solid #666;
+            background-color: ${currentMeasureIndex === 0 ? '#555' : '#666'};
+            color: white;
+            font-size: 18px;
+            cursor: ${currentMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
             box-sizing: border-box;
-            opacity: ${totalMeasures <= 1 ? 0.5 : 1};
+            opacity: ${currentMeasureIndex === 0 ? 0.5 : 1};
             
             &:hover:not(:disabled) {
-              background-color: #ef9a9a;
+              background-color: #777;
               transform: scale(1.05);
             }
             
@@ -135,9 +136,9 @@ export const MeasureBar = ({
               transform: scale(0.95);
             }
           `}
-          title="現在の小節を削除"
+          title="前の小節へ"
         >
-          −
+          &lt;
         </button>
 
         {/* 小節数ラベル */}
@@ -153,74 +154,74 @@ export const MeasureBar = ({
           {currentMeasureIndex + 1}/{totalMeasures}
         </div>
 
-        {/* +ボタン */}
+        {/* 次へボタン */}
         <button
-          onClick={handleAddClick}
-          onTouchEnd={handleAddClick}
+          onClick={handleNextClick}
+          onTouchEnd={handleNextClick}
+          disabled={currentMeasureIndex >= totalMeasures - 1}
           css={css`
             width: 40px;
             height: 40px;
             border-radius: 8px;
-            border: 2px solid #a5d6a7;
-            background-color: #c8e6c9;
-            color: #2e7d32;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
+            border: 2px solid #666;
+            background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#555' : '#666'};
+            color: white;
+            font-size: 18px;
+            cursor: ${currentMeasureIndex >= totalMeasures - 1 ? 'not-allowed' : 'pointer'};
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
             box-sizing: border-box;
+            opacity: ${currentMeasureIndex >= totalMeasures - 1 ? 0.5 : 1};
             
-            &:hover {
-              background-color: #a5d6a7;
+            &:hover:not(:disabled) {
+              background-color: #777;
               transform: scale(1.05);
             }
             
-            &:active {
+            &:active:not(:disabled) {
               transform: scale(0.95);
             }
           `}
-          title="小節を保存して新規作成"
+          title="次の小節へ"
         >
-          +
+          &gt;
         </button>
       </div>
 
-      {/* 右側：次へボタン */}
+      {/* +ボタン */}
       <button
-        onClick={handleNextClick}
-        onTouchEnd={handleNextClick}
-        disabled={currentMeasureIndex >= totalMeasures - 1}
+        onClick={handleAddClick}
+        onTouchEnd={handleAddClick}
         css={css`
           width: 40px;
           height: 40px;
           border-radius: 8px;
-          border: 2px solid #666;
-          background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#555' : '#666'};
-          color: white;
-          font-size: 18px;
-          cursor: ${currentMeasureIndex >= totalMeasures - 1 ? 'not-allowed' : 'pointer'};
+          border: 2px solid #a5d6a7;
+          background-color: #c8e6c9;
+          color: #2e7d32;
+          font-size: 24px;
+          font-weight: bold;
+          cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: all 0.2s;
           box-sizing: border-box;
-          opacity: ${currentMeasureIndex >= totalMeasures - 1 ? 0.5 : 1};
           
-          &:hover:not(:disabled) {
-            background-color: #777;
+          &:hover {
+            background-color: #a5d6a7;
             transform: scale(1.05);
           }
           
-          &:active:not(:disabled) {
+          &:active {
             transform: scale(0.95);
           }
         `}
-        title="次の小節へ"
+        title="小節を保存して新規作成"
       >
-        &gt;
+        +
       </button>
     </div>
   );
