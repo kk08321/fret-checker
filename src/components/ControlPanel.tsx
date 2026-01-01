@@ -213,8 +213,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         messageWrapper,
         css`
           padding-bottom: ${isSafari 
-            ? `calc(110px + env(safe-area-inset-bottom, 0px))` 
-            : `5px`};
+            ? `calc(170px + env(safe-area-inset-bottom, 0px))` 
+            : `60px`};
         `
       ]}>
         <p css={fretLabel}>{notes.length >= 1 && `1. ${notes[0]}`}</p>
