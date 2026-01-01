@@ -55,7 +55,7 @@ export const MeasureBar = ({
         right: 0;
         width: 100%;
         height: 50px;
-        background-color: #f5f5f5;
+        background-color: #f2f2f7;
         border-bottom: 1px solid #e0e0e0;
         border-radius: 0 0 12px 12px;
         display: flex;

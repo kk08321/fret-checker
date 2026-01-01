@@ -10,6 +10,37 @@ import { calculateFretHeights } from "./utils/fretboard";
 
 const NUM_FRETS = 20;
 
+/**
+ * フレット番号からヒートマップ色を計算
+ * 開放（0）: 緑
+ * 19フレット: 赤
+ * 序盤のフレットで赤成分が早く増えるように非線形補間を使用
+ */
+const getFretColor = (fret: number): string => {
+  // 0から19の範囲で0.0（緑）から1.0（赤）に正規化
+  const linearRatio = fret / (NUM_FRETS - 1);
+  
+  // 序盤で赤成分が早く増えるように、2.5乗関数を使用
+  // これにより、フレットの物理的な幅の違いを視覚的に補正
+  const ratio = Math.pow(linearRatio, 0.45);
+  
+  // 緑色: rgb(34, 197, 94) - 見やすい緑
+  // 赤色: rgb(239, 68, 68) - 見やすい赤
+  const greenR = 34;
+  const greenG = 197;
+  const greenB = 94;
+  const redR = 239;
+  const redG = 68;
+  const redB = 68;
+  
+  // 非線形補間
+  const r = Math.round(greenR + (redR - greenR) * ratio);
+  const g = Math.round(greenG + (redG - greenG) * ratio);
+  const b = Math.round(greenB + (redB - greenB) * ratio);
+  
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 function FretboardPage() {
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { tuning } = useTuning();
@@ -87,6 +118,7 @@ function FretboardPage() {
         display: flex;
         flex-direction: column;
         align-items: center;
+        background-color: #f2f2f7;
         justify-content: flex-start;
         padding: 10px;
         padding-top: 60px;
@@ -108,11 +140,19 @@ function FretboardPage() {
         css={css`
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
+          align-items: center;
+          flex: 1;
+          justify-content: center;
           width: 100%;
-          max-width: 100%;
         `}
       >
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          `}
+        >
         {/* チューニング表示（フレットボードの上、枠外） */}
         <div
           css={css`
@@ -120,6 +160,7 @@ function FretboardPage() {
             flex-direction: row;
             margin-bottom: 15px;
             position: relative;
+            width: 203px; /* フレット番号ヘッダー(30px) + マージン(5px) + フレットボード(168px) */
           `}
         >
           {strings.map((stringNum, index) => {
@@ -155,8 +196,6 @@ function FretboardPage() {
             display: flex;
             flex-direction: row;
             align-items: flex-start;
-            width: 100%;
-            max-width: 100%;
           `}
         >
           {/* フレット番号のヘッダー（左側、縦方向、茶色背景の外側） */}
@@ -289,7 +328,7 @@ function FretboardPage() {
                           width: 24px;
                           height: 24px;
                           border-radius: 50%;
-                          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #c44569 100%);
+                          background: ${getFretColor(position.fret)};
                           display: flex;
                           align-items: center;
                           justify-content: center;
@@ -398,6 +437,7 @@ function FretboardPage() {
               </>
             );
           })()}
+        </div>
         </div>
         </div>
       </div>

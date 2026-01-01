@@ -127,6 +127,7 @@ function SheetPage() {
         padding-top: 50px;
         box-sizing: border-box;
         position: relative;
+        background-color: #FCFCFC;
       `}
       onTouchStart={setCoordinatesByTouchEvent}
       onTouchMove={setCoordinatesByTouchEvent}

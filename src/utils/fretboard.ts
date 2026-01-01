@@ -20,7 +20,7 @@ export const getFretHeight = (fret: number, baseHeight: number = 90): number => 
 };
 
 // 各フレットの高さを事前計算
-export const calculateFretHeights = (numFrets: number = 20, baseHeight: number = 90): number[] => {
+export const calculateFretHeights = (numFrets: number = 20, baseHeight: number = 75): number[] => {
   return Array.from({ length: numFrets }, (_, i) => getFretHeight(i, baseHeight));
 };
 
