@@ -29,7 +29,6 @@ export const messageWrapper = css`
   p {
     margin: 0;
   }
-  padding-bottom: calc(5px + 60px);
   overflow-x: auto;
   width: 100%;
   box-sizing: border-box;

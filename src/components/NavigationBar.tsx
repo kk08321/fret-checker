@@ -104,7 +104,8 @@ export const NavigationBar = () => {
         left: 0;
         right: 0;
         width: 100%;
-        height: 60px;
+        height: calc(60px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
         background-color: #333;
         display: flex;
         z-index: 1000;

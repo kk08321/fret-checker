@@ -50,6 +50,11 @@ const iconButtonActive = css`
 `;
 
 function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
+  // Safariかどうかを判定（Chromeを除外）
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && 
+                   !/chrome/i.test(navigator.userAgent) && 
+                   navigator.vendor === "Apple Computer, Inc.";
+
   const handleClearClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -201,7 +206,14 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           </svg>
         </div>
       </div>
-      <div css={messageWrapper}>
+      <div css={[
+        messageWrapper,
+        css`
+          padding-bottom: ${isSafari 
+            ? `calc(110px + env(safe-area-inset-bottom, 0px))` 
+            : `5px`};
+        `
+      ]}>
         <p css={fretLabel}>{notes.length >= 1 && `1. ${notes[0]}`}</p>
         <p css={fretLabel}>{notes.length >= 2 && `2. ${notes[1]}`}</p>
         <p css={fretLabel}>{notes.length >= 3 && `3. ${notes[2]}`}</p>

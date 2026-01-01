@@ -128,7 +128,6 @@ function SheetPage() {
         display: flex;
         flex-direction: column;
         padding-top: 50px;
-        padding-bottom: 60px;
         box-sizing: border-box;
         position: relative;
       `}
