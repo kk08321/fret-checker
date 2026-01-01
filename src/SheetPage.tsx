@@ -38,6 +38,7 @@ function SheetPage() {
     setIsFlatMode,
     isNaturalMode,
     setIsNaturalMode,
+    recordDragStart,
     measures,
     currentMeasureIndex,
     saveCurrentMeasureAndCreateNew,
@@ -331,6 +332,7 @@ function SheetPage() {
         isFlatMode={isFlatMode}
         onNaturalModeStart={handleNaturalModeStart}
         isNaturalMode={isNaturalMode}
+        recordDragStart={recordDragStart}
       />
     </div>
   );

@@ -15,6 +15,7 @@ interface ControlPanelProps {
   isFlatMode?: boolean;
   onNaturalModeStart?: (enabled: boolean) => void;
   isNaturalMode?: boolean;
+  recordDragStart?: (x: number, y: number) => void;
 }
 
 // プレートコンテナ（5ボタンを包む単一のプレート）
@@ -128,7 +129,7 @@ const groupDivider = css`
   flex-shrink: 0;
 `;
 
-function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
+function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false, recordDragStart }: ControlPanelProps) {
   // Safariかどうかを判定（Chromeを除外）
   const isSafari = (
     /safari/i.test(navigator.userAgent) && 
@@ -153,54 +154,341 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
   const flatIconRef = useRef<HTMLDivElement>(null);
   const naturalIconRef = useRef<HTMLDivElement>(null);
 
-  // タッチイベントハンドラー
+  // タッチ操作の開始位置を記録（各ボタンごとに独立）
+  const touchStartPosRef = useRef<{ sharp: { x: number; y: number } | null; flat: { x: number; y: number } | null; natural: { x: number; y: number } | null }>({
+    sharp: null,
+    flat: null,
+    natural: null,
+  });
+  // D&D操作かどうかを追跡（各ボタンごと）
+  const isDragOperationRef = useRef<{ sharp: boolean; flat: boolean; natural: boolean }>({
+    sharp: false,
+    flat: false,
+    natural: false,
+  });
+  // タッチイベントで処理したかどうかを追跡（onClickとの重複を防ぐため）
+  const touchHandledRef = useRef<{ sharp: boolean; flat: boolean; natural: boolean }>({
+    sharp: false,
+    flat: false,
+    natural: false,
+  });
+  // 現在のモード状態をrefで保持（useEffectのクロージャ問題を回避）
+  const modeStateRef = useRef<{ sharp: boolean; flat: boolean; natural: boolean }>({
+    sharp: isSharpMode,
+    flat: isFlatMode,
+    natural: isNaturalMode,
+  });
+  
+  // モード状態が変更されたらrefを更新
+  useEffect(() => {
+    modeStateRef.current.sharp = isSharpMode;
+  }, [isSharpMode]);
+  
+  useEffect(() => {
+    modeStateRef.current.flat = isFlatMode;
+  }, [isFlatMode]);
+  
+  useEffect(() => {
+    modeStateRef.current.natural = isNaturalMode;
+  }, [isNaturalMode]);
+  
+  const TOGGLE_THRESHOLD = 10; // トグルと判定する移動距離の閾値（px）
+
+  // シャープボタンのトグルハンドラー
+  const handleSharpToggle = (e: React.MouseEvent | React.TouchEvent) => {
+    // タッチイベントで既に処理済みの場合は無視
+    if (touchHandledRef.current.sharp) {
+      touchHandledRef.current.sharp = false;
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    // 現在のモードをトグル
+    onSharpModeStart?.(!isSharpMode);
+  };
+
+  // フラットボタンのトグルハンドラー
+  const handleFlatToggle = (e: React.MouseEvent | React.TouchEvent) => {
+    // タッチイベントで既に処理済みの場合は無視
+    if (touchHandledRef.current.flat) {
+      touchHandledRef.current.flat = false;
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    // 現在のモードをトグル
+    onFlatModeStart?.(!isFlatMode);
+  };
+
+  // ナチュラルボタンのトグルハンドラー
+  const handleNaturalToggle = (e: React.MouseEvent | React.TouchEvent) => {
+    // タッチイベントで既に処理済みの場合は無視
+    if (touchHandledRef.current.natural) {
+      touchHandledRef.current.natural = false;
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    // 現在のモードをトグル
+    onNaturalModeStart?.(!isNaturalMode);
+  };
+
+  // タッチイベントハンドラー（D&Dとトグルを区別）
   useEffect(() => {
     const sharpIconElement = sharpIconRef.current;
     if (!sharpIconElement) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      onSharpModeStart?.(true);
+      e.preventDefault(); // スクロールを防ぐため
+      // 開始位置を記録
+      const startX = e.touches[0].clientX;
+      const startY = e.touches[0].clientY;
+      if (!touchStartPosRef.current) {
+        touchStartPosRef.current = { sharp: null, flat: null, natural: null };
+      }
+      touchStartPosRef.current.sharp = {
+        x: startX,
+        y: startY,
+      };
+      // D&D操作の開始位置を記録
+      recordDragStart?.(startX, startY);
+      // D&D操作フラグをリセット
+      isDragOperationRef.current.sharp = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStartPosRef.current || !touchStartPosRef.current.sharp) return;
+      
+      e.preventDefault(); // スクロールを防ぐため
+      
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(currentX - touchStartPosRef.current.sharp.x, 2) +
+        Math.pow(currentY - touchStartPosRef.current.sharp.y, 2)
+      );
+
+      // 移動距離が閾値を超えた場合、D&D操作として扱う
+      if (distance > TOGGLE_THRESHOLD && !isDragOperationRef.current.sharp) {
+        isDragOperationRef.current.sharp = true;
+        // D&D操作の開始としてモードを有効化（現在の挙動を維持）
+        onSharpModeStart?.(true);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault(); // スクロールを防ぐため
+      
+      // touchStartPosRefがnullまたはsharpがnullの場合は、touchstartが呼ばれていない可能性がある
+      // その場合は直接トグル処理を行う
+      if (!touchStartPosRef.current || !touchStartPosRef.current.sharp) {
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.sharp = true;
+        onSharpModeStart?.(!modeStateRef.current.sharp);
+        return;
+      }
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(endX - touchStartPosRef.current.sharp.x, 2) +
+        Math.pow(endY - touchStartPosRef.current.sharp.y, 2)
+      );
+
+      // 移動距離が閾値以下の場合はトグル操作として扱う
+      if (distance <= TOGGLE_THRESHOLD && !isDragOperationRef.current.sharp) {
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.sharp = true; // タッチイベントで処理済みをマーク
+        onSharpModeStart?.(!modeStateRef.current.sharp);
+      }
+      // 移動距離が閾値より大きい場合はD&D操作として扱う（既にモードが有効化されているので何もしない）
+      // D&D操作の場合はstopPropagation()を呼ばない（親要素のonEnterを呼ばせるため）
+
+      // クリーンアップ
+      touchStartPosRef.current.sharp = null;
+      isDragOperationRef.current.sharp = false;
     };
 
     sharpIconElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    sharpIconElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    sharpIconElement.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       sharpIconElement.removeEventListener('touchstart', handleTouchStart);
+      sharpIconElement.removeEventListener('touchmove', handleTouchMove);
+      sharpIconElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [onSharpModeStart]);
+  }, [onSharpModeStart, recordDragStart]);
 
   useEffect(() => {
     const flatIconElement = flatIconRef.current;
     if (!flatIconElement) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      onFlatModeStart?.(true);
+      e.preventDefault(); // スクロールを防ぐため
+      // 開始位置を記録
+      const startX = e.touches[0].clientX;
+      const startY = e.touches[0].clientY;
+      if (!touchStartPosRef.current) {
+        touchStartPosRef.current = { sharp: null, flat: null, natural: null };
+      }
+      touchStartPosRef.current.flat = {
+        x: startX,
+        y: startY,
+      };
+      // D&D操作の開始位置を記録
+      recordDragStart?.(startX, startY);
+      // D&D操作フラグをリセット
+      isDragOperationRef.current.flat = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStartPosRef.current || !touchStartPosRef.current.flat) return;
+      
+      e.preventDefault(); // スクロールを防ぐため
+      
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(currentX - touchStartPosRef.current.flat.x, 2) +
+        Math.pow(currentY - touchStartPosRef.current.flat.y, 2)
+      );
+
+      // 移動距離が閾値を超えた場合、D&D操作として扱う
+      if (distance > TOGGLE_THRESHOLD && !isDragOperationRef.current.flat) {
+        isDragOperationRef.current.flat = true;
+        // D&D操作の開始としてモードを有効化（現在の挙動を維持）
+        onFlatModeStart?.(true);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault(); // スクロールを防ぐため
+      
+      if (!touchStartPosRef.current || !touchStartPosRef.current.flat) {
+        // touchStartPosRefがnullまたはflatがnullの場合は、touchstartが呼ばれていない可能性がある
+        // その場合は直接トグル処理を行う
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.flat = true;
+        onFlatModeStart?.(!modeStateRef.current.flat);
+        return;
+      }
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(endX - touchStartPosRef.current.flat.x, 2) +
+        Math.pow(endY - touchStartPosRef.current.flat.y, 2)
+      );
+
+      // 移動距離が閾値以下の場合はトグル操作として扱う
+      if (distance <= TOGGLE_THRESHOLD && !isDragOperationRef.current.flat) {
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.flat = true; // タッチイベントで処理済みをマーク
+        onFlatModeStart?.(!modeStateRef.current.flat);
+      }
+      // 移動距離が閾値より大きい場合はD&D操作として扱う（既にモードが有効化されているので何もしない）
+      // D&D操作の場合はstopPropagation()を呼ばない（親要素のonEnterを呼ばせるため）
+
+      touchStartPosRef.current.flat = null;
+      isDragOperationRef.current.flat = false;
     };
 
     flatIconElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    flatIconElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    flatIconElement.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       flatIconElement.removeEventListener('touchstart', handleTouchStart);
+      flatIconElement.removeEventListener('touchmove', handleTouchMove);
+      flatIconElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [onFlatModeStart]);
+  }, [onFlatModeStart, recordDragStart]);
 
   useEffect(() => {
     const naturalIconElement = naturalIconRef.current;
     if (!naturalIconElement) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-      onNaturalModeStart?.(true);
+      e.preventDefault(); // スクロールを防ぐため
+      // 開始位置を記録
+      const startX = e.touches[0].clientX;
+      const startY = e.touches[0].clientY;
+      if (!touchStartPosRef.current) {
+        touchStartPosRef.current = { sharp: null, flat: null, natural: null };
+      }
+      touchStartPosRef.current.natural = {
+        x: startX,
+        y: startY,
+      };
+      // D&D操作の開始位置を記録
+      recordDragStart?.(startX, startY);
+      // D&D操作フラグをリセット
+      isDragOperationRef.current.natural = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!touchStartPosRef.current || !touchStartPosRef.current.natural) return;
+      
+      e.preventDefault(); // スクロールを防ぐため
+      
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(currentX - touchStartPosRef.current.natural.x, 2) +
+        Math.pow(currentY - touchStartPosRef.current.natural.y, 2)
+      );
+
+      // 移動距離が閾値を超えた場合、D&D操作として扱う
+      if (distance > TOGGLE_THRESHOLD && !isDragOperationRef.current.natural) {
+        isDragOperationRef.current.natural = true;
+        // D&D操作の開始としてモードを有効化（現在の挙動を維持）
+        onNaturalModeStart?.(true);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault(); // スクロールを防ぐため
+      
+      if (!touchStartPosRef.current || !touchStartPosRef.current.natural) {
+        // touchStartPosRefがnullまたはnaturalがnullの場合は、touchstartが呼ばれていない可能性がある
+        // その場合は直接トグル処理を行う
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.natural = true;
+        onNaturalModeStart?.(!modeStateRef.current.natural);
+        return;
+      }
+      
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const distance = Math.sqrt(
+        Math.pow(endX - touchStartPosRef.current.natural.x, 2) +
+        Math.pow(endY - touchStartPosRef.current.natural.y, 2)
+      );
+
+      // 移動距離が閾値以下の場合はトグル操作として扱う
+      if (distance <= TOGGLE_THRESHOLD && !isDragOperationRef.current.natural) {
+        e.stopPropagation(); // トグル操作の場合は親要素のonTouchEndを防ぐ
+        touchHandledRef.current.natural = true; // タッチイベントで処理済みをマーク
+        onNaturalModeStart?.(!modeStateRef.current.natural);
+      }
+      // 移動距離が閾値より大きい場合はD&D操作として扱う（既にモードが有効化されているので何もしない）
+      // D&D操作の場合はstopPropagation()を呼ばない（親要素のonEnterを呼ばせるため）
+
+      touchStartPosRef.current.natural = null;
+      isDragOperationRef.current.natural = false;
     };
 
     naturalIconElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    naturalIconElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    naturalIconElement.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       naturalIconElement.removeEventListener('touchstart', handleTouchStart);
+      naturalIconElement.removeEventListener('touchmove', handleTouchMove);
+      naturalIconElement.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [onNaturalModeStart]);
+  }, [onNaturalModeStart, recordDragStart]);
 
   // ボタングループのコンテナスタイル
   const buttonsWrapper = css`
@@ -221,14 +509,18 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           {/* 左グループ: ♯, ♭, ♮ */}
           <div 
             ref={sharpIconRef}
+            onClick={handleSharpToggle}
             css={[
               iconButtonBase,
               sharpButton,
               isSharpMode && iconButtonActive,
               css`
                 touch-action: none;
-                min-width: 44px;
-                min-height: 44px;
+                width: 50px;
+                height: 50px;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+                -webkit-user-select: none;
               `
             ]}
           >
@@ -240,14 +532,18 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           </div>
           <div 
             ref={flatIconRef}
+            onClick={handleFlatToggle}
             css={[
               iconButtonBase,
               flatButton,
               isFlatMode && iconButtonActive,
               css`
                 touch-action: none;
-                min-width: 44px;
-                min-height: 44px;
+                width: 50px;
+                height: 50px;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+                -webkit-user-select: none;
               `
             ]}
           >
@@ -259,14 +555,18 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           </div>
           <div 
             ref={naturalIconRef}
+            onClick={handleNaturalToggle}
             css={[
               iconButtonBase,
               naturalButton,
               isNaturalMode && iconButtonActive,
               css`
                 touch-action: none;
-                min-width: 44px;
-                min-height: 44px;
+                width: 50px;
+                height: 50px;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+                -webkit-user-select: none;
               `
             ]}
           >

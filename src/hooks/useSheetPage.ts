@@ -38,6 +38,8 @@ export const useSheetPage = () => {
   
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const controlWrapperRef = useRef<HTMLDivElement>(null);
+  // D&D操作の開始位置を追跡（ControlPanelから始まった操作かどうかを判定するため）
+  const dragStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
   const setCoordinatesByTouchEvent = (e: React.TouchEvent<HTMLDivElement>) => {
     setTouchCoordinates({ x: e.touches[0].clientX, y: e.touches[0].clientY });
@@ -170,10 +172,27 @@ export const useSheetPage = () => {
       }
       
       noteNumbersCopy.push(noteToAdd);
-      // シャープモードとフラットモード、ナチュラルモードをリセット
-      setIsSharpMode(false);
-      setIsFlatMode(false);
-      setIsNaturalMode(false);
+      // D&D操作の場合のみモードをリセット（トグルモードの場合は維持）
+      // ControlPanelから始まった操作（D&D操作）の場合のみリセット
+      if (dragStartPosRef.current && controlWrapperRef.current) {
+        const controlRect = controlWrapperRef.current.getBoundingClientRect();
+        const startX = dragStartPosRef.current.x;
+        const startY = dragStartPosRef.current.y;
+        // 開始位置がControlPanelの範囲内かチェック
+        if (
+          startX >= controlRect.left &&
+          startX <= controlRect.right &&
+          startY >= controlRect.top &&
+          startY <= controlRect.bottom
+        ) {
+          // D&D操作の場合のみモードをリセット
+          setIsSharpMode(false);
+          setIsFlatMode(false);
+          setIsNaturalMode(false);
+        }
+      }
+      // D&D操作の開始位置をクリア
+      dragStartPosRef.current = null;
     }
     // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
@@ -251,6 +270,11 @@ export const useSheetPage = () => {
     // 移動先の小節の内容がinputtedNoteNumbersに設定される
   };
 
+  // D&D操作の開始位置を記録するコールバック
+  const recordDragStart = (x: number, y: number) => {
+    dragStartPosRef.current = { x, y };
+  };
+
   return {
     touchCoordinates,
     setTouchCoordinates,
@@ -270,6 +294,7 @@ export const useSheetPage = () => {
     setIsFlatMode,
     isNaturalMode,
     setIsNaturalMode,
+    recordDragStart,
     // 小節管理関連
     measures,
     currentMeasureIndex,
