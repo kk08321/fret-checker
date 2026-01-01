@@ -69,6 +69,13 @@ export const playChord = (noteStrs: string[], duration: number = 0.5): void => {
   if (noteStrs.length === 0) return;
   
   try {
+    // 低い音から順に並べ替える（MIDIノート番号でソート）
+    const sortedNoteStrs = [...noteStrs].sort((a, b) => {
+      const midiA = noteStringToMidi(a);
+      const midiB = noteStringToMidi(b);
+      return midiA - midiB;
+    });
+    
     // AudioContextを作成（既存のコンテキストがあれば再利用）
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) {
@@ -90,12 +97,12 @@ export const playChord = (noteStrs: string[], duration: number = 0.5): void => {
           await audioContext.resume();
           console.log('Audio context resumed');
         }
-        console.log('Playing chord with', noteStrs.length, 'notes:', noteStrs);
-        playChordInternal(audioContext, noteStrs, duration);
+        console.log('Playing chord with', sortedNoteStrs.length, 'notes:', sortedNoteStrs);
+        playChordInternal(audioContext, sortedNoteStrs, duration);
       } catch (error) {
         console.error('Error in resumeAndPlay:', error);
         // エラーが発生しても再生を試みる
-        playChordInternal(audioContext, noteStrs, duration);
+        playChordInternal(audioContext, sortedNoteStrs, duration);
       }
     };
     
@@ -121,7 +128,7 @@ const playChordInternal = (audioContext: AudioContext, noteStrs: string[], durat
     // エンベロープを設定（ギターらしいアタックとディケイ）
     const attackTime = 0.005; // 5msのアタック（鋭い）
     const decayTime = 0.1; // 100msのディケイ
-    const sustainLevel = 0.4; // サステインレベル
+    const sustainLevel = 0.5; // サステインレベル
     const releaseTime = duration - attackTime - decayTime; // リリース
     
     // 和音の数に応じて各音符の音量を調整（和音が多いほど各音符の音量を少しだけ下げる）
@@ -130,7 +137,7 @@ const playChordInternal = (audioContext: AudioContext, noteStrs: string[], durat
     
     // 各音符に対してオシレーターを作成
     // 「ジャラーン」と聞こえるように、各音符の再生開始時間を少しずつずらす
-    const staggerDelay = 0.03; // 各音符間の遅延時間（15ミリ秒）
+    const staggerDelay = 0.025; // 各音符間の遅延時間（15ミリ秒）
     
     noteStrs.forEach((noteStr, index) => {
       const midi = noteStringToMidi(noteStr);

@@ -92,31 +92,27 @@ function SheetPage() {
     setIsNaturalMode(enabled);
   };
 
-  const handlePlay = (e?: React.MouseEvent | React.TouchEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  const handlePlay = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (inputtedNoteNumbers.length > 0) {
       console.log('Playing chord:', inputtedNoteNumbers);
       playChord(inputtedNoteNumbers);
     }
   };
 
-  const handleButtonTouchStart = (e: React.TouchEvent) => {
+  const handlePlayTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleButtonTouchMove = (e: React.TouchEvent) => {
+  const handlePlayTouchEnd = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-  };
-
-  const handleButtonTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    handlePlay(e);
+    if (inputtedNoteNumbers.length > 0) {
+      console.log('Playing chord:', inputtedNoteNumbers);
+      playChord(inputtedNoteNumbers);
+    }
   };
 
   return (
@@ -146,15 +142,14 @@ function SheetPage() {
       {isAudioEnabled && (
         <button
           onClick={handlePlay}
-          onTouchStart={handleButtonTouchStart}
-          onTouchMove={handleButtonTouchMove}
-          onTouchEnd={handleButtonTouchEnd}
+          onTouchStart={handlePlayTouchStart}
+          onTouchEnd={handlePlayTouchEnd}
           disabled={inputtedNoteNumbers.length === 0}
           css={css`
             position: absolute;
             top: 60px;
             left: 10px;
-            z-index: 100;
+            z-index: 200;
             width: 50px;
             height: 50px;
             border-radius: 50%;
