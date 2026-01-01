@@ -1,7 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { useEffect } from "react";
 import { useGuitarNotes } from "./contexts/GuitarNotesContext";
 import { useTuning } from "./contexts/TuningContext";
+import { useMeasure } from "./contexts/MeasureContext";
+import { MeasureBar } from "./components/MeasureBar";
 import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
 import { parseNoteNumber } from "./utils/noteUtils";
 import { calculateFretHeights } from "./utils/fretboard";
@@ -9,8 +12,29 @@ import { calculateFretHeights } from "./utils/fretboard";
 const NUM_FRETS = 20;
 
 function FretboardPage() {
-  const { inputtedNoteNumbers } = useGuitarNotes();
+  const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { tuning } = useTuning();
+  // MeasureContextから小節情報を取得（SheetPageと共有）
+  const {
+    measures,
+    currentMeasureIndex,
+    saveCurrentMeasureAndCreateNew,
+    deleteCurrentMeasure,
+    navigateToMeasure,
+  } = useMeasure();
+
+  /**
+   * currentMeasureIndexが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
+   * FretboardPageで小節を切り替えた際に、その小節の音符を表示するために呼ばれる
+   * SheetPageとFretboardPageで同じ小節情報を共有するため、どちらのページで小節を切り替えても
+   * もう一方のページでも反映される
+   */
+  useEffect(() => {
+    if (measures[currentMeasureIndex] !== undefined) {
+      setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMeasureIndex]);
 
   // 各音符から押弦箇所を計算
   const getFretPositions = () => {
@@ -59,6 +83,7 @@ function FretboardPage() {
         align-items: center;
         justify-content: flex-start;
         padding: 10px;
+        padding-top: 60px;
         padding-bottom: 70px;
         box-sizing: border-box;
         overflow-y: auto;
@@ -66,6 +91,13 @@ function FretboardPage() {
         min-height: 0;
       `}
     >
+      <MeasureBar
+        currentMeasureIndex={currentMeasureIndex}
+        totalMeasures={measures.length}
+        onAddMeasure={saveCurrentMeasureAndCreateNew}
+        onDeleteMeasure={deleteCurrentMeasure}
+        onNavigateMeasure={navigateToMeasure}
+      />
       <div
         css={css`
           display: flex;

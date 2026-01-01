@@ -4,6 +4,7 @@ import { useGuitarNotes } from "../contexts/GuitarNotesContext";
 import { useKeySignature } from "../contexts/KeySignatureContext";
 import { useTuning } from "../contexts/TuningContext";
 import { useAudioSettings } from "../contexts/AudioSettingsContext";
+import { useMeasure } from "../contexts/MeasureContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
 import { playChord } from "../utils/audio";
 
@@ -23,12 +24,14 @@ export const useSheetPage = () => {
   const { selectedKeySignature } = useKeySignature();
   const { tuning } = useTuning();
   const { audioPlayback } = useAudioSettings();
-  
-  // 小節管理の状態
-  const [measures, setMeasures] = useState<string[][]>([[]]); // 小節の配列（各小節は音符の配列）
-  const [currentMeasureIndex, setCurrentMeasureIndex] = useState(0); // 現在の小節インデックス
-  const isLoadingMeasureRef = useRef(false); // 小節読み込み中フラグ（無限ループを防ぐ）
-  const currentMeasureIndexRef = useRef(0); // currentMeasureIndexの最新値を保持
+  const {
+    measures,
+    currentMeasureIndex,
+    saveCurrentMeasureAndCreateNew,
+    deleteCurrentMeasure,
+    navigateToMeasure,
+    updateCurrentMeasure,
+  } = useMeasure();
   
   // inputtedNoteNumbersから動的にnotesを計算
   const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr, tuning));
@@ -184,92 +187,67 @@ export const useSheetPage = () => {
     setTouchCoordinates({ x: 0, y: -100 });
   };
 
-  // currentMeasureIndexの変更をrefに反映
-  useEffect(() => {
-    currentMeasureIndexRef.current = currentMeasureIndex;
-  }, [currentMeasureIndex]);
+  // inputtedNoteNumbersを小節から読み込んでいる最中かどうかを示すフラグ
+  // このフラグにより、小節読み込み時にupdateCurrentMeasureが呼ばれるのを防ぐ（無限ループ防止）
+  const isUpdatingFromMeasureRef = useRef(false);
 
-  // inputtedNoteNumbersが変更されたときに、現在の小節に保存する
+  /**
+   * inputtedNoteNumbersが変更されたときに、現在の小節に保存する
+   * ユーザーが音符を入力した際に、その内容を現在の小節に反映する
+   */
   useEffect(() => {
-    if (!isLoadingMeasureRef.current) {
-      setMeasures(prevMeasures => {
-        const newMeasures = [...prevMeasures];
-        const currentIndex = currentMeasureIndexRef.current;
-        if (newMeasures[currentIndex] !== undefined) {
-          newMeasures[currentIndex] = [...inputtedNoteNumbers];
-        }
-        return newMeasures;
-      });
+    // 小節から読み込んでいる最中でない場合のみ更新
+    if (!isUpdatingFromMeasureRef.current) {
+      updateCurrentMeasure(inputtedNoteNumbers);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputtedNoteNumbers]);
 
-  // 小節を保存して新規小節を作成
-  const saveCurrentMeasureAndCreateNew = () => {
-    const currentNotes = [...inputtedNoteNumbers];
-    const newMeasures = [...measures];
-    newMeasures[currentMeasureIndex] = currentNotes; // 現在の小節を保存
-    newMeasures.push([]); // 新規小節を追加
-    setMeasures(newMeasures);
-    isLoadingMeasureRef.current = true;
-    setCurrentMeasureIndex(newMeasures.length - 1);
-    setInputtedNoteNumbers([]); // 新規小節なので空にする
-    isLoadingMeasureRef.current = false;
+  /**
+   * currentMeasureIndexが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
+   * 小節を切り替えた際に、その小節の音符を表示するために呼ばれる
+   */
+  useEffect(() => {
+    if (measures[currentMeasureIndex] !== undefined) {
+      isUpdatingFromMeasureRef.current = true;
+      setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
+      isUpdatingFromMeasureRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentMeasureIndex]);
+
+  /**
+   * 現在の小節を保存して新規小節を作成
+   * 現在の入力内容を保存してから、新しい空の小節を作成する
+   */
+  const handleSaveCurrentMeasureAndCreateNew = () => {
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
+    saveCurrentMeasureAndCreateNew(); // 新規小節を作成して移動
+    // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
+    // 新規小節は空なので、useEffectで空の配列がinputtedNoteNumbersに設定される
   };
 
-  // 現在の小節を削除
-  const deleteCurrentMeasure = () => {
-    // 小節が1つだけの場合は削除しない（空の小節を1つ残す）
-    if (measures.length <= 1) {
-      return;
-    }
-
-    isLoadingMeasureRef.current = true;
-    const newMeasures = [...measures];
-    newMeasures.splice(currentMeasureIndex, 1); // 現在の小節を削除
-    
-    // 削除後のインデックスを決定
-    let newIndex: number;
-    if (currentMeasureIndex === measures.length - 1) {
-      // 最後の小節を削除した場合は、新しい最後の小節に移動
-      newIndex = newMeasures.length - 1;
-    } else {
-      // それ以外の場合は、前の小節に移動（インデックスを1つ減らす）
-      newIndex = currentMeasureIndex - 1;
-      if (newIndex < 0) {
-        newIndex = 0;
-      }
-    }
-    
-    setMeasures(newMeasures);
-    setCurrentMeasureIndex(newIndex);
-    setInputtedNoteNumbers([...newMeasures[newIndex]]);
-    isLoadingMeasureRef.current = false;
+  /**
+   * 現在の小節を削除
+   * 現在の入力内容を保存してから、小節を削除する
+   */
+  const handleDeleteCurrentMeasure = () => {
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
+    deleteCurrentMeasure(); // 小節を削除
+    // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
+    // 削除後の小節の内容がinputtedNoteNumbersに設定される
   };
 
-  // 小節間を移動
-  const navigateToMeasure = (direction: 'prev' | 'next') => {
-    const currentNotes = [...inputtedNoteNumbers];
-    const newMeasures = [...measures];
-    newMeasures[currentMeasureIndex] = currentNotes; // 現在の入力を保存
-    
-    if (direction === 'prev' && currentMeasureIndex > 0) {
-      setMeasures(newMeasures);
-      isLoadingMeasureRef.current = true;
-      const targetIndex = currentMeasureIndex - 1;
-      setCurrentMeasureIndex(targetIndex);
-      setInputtedNoteNumbers([...newMeasures[targetIndex]]);
-      isLoadingMeasureRef.current = false;
-    } else if (direction === 'next' && currentMeasureIndex < measures.length - 1) {
-      setMeasures(newMeasures);
-      isLoadingMeasureRef.current = true;
-      const targetIndex = currentMeasureIndex + 1;
-      setCurrentMeasureIndex(targetIndex);
-      setInputtedNoteNumbers([...newMeasures[targetIndex]]);
-      isLoadingMeasureRef.current = false;
-    } else {
-      setMeasures(newMeasures);
-    }
+  /**
+   * 前後の小節に移動
+   * 現在の入力内容を保存してから、指定方向の小節に移動する
+   * @param direction 移動方向（'prev' または 'next'）
+   */
+  const handleNavigateToMeasure = (direction: 'prev' | 'next') => {
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
+    navigateToMeasure(direction); // 小節を移動
+    // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
+    // 移動先の小節の内容がinputtedNoteNumbersに設定される
   };
 
   return {
@@ -294,9 +272,9 @@ export const useSheetPage = () => {
     // 小節管理関連
     measures,
     currentMeasureIndex,
-    saveCurrentMeasureAndCreateNew,
-    deleteCurrentMeasure,
-    navigateToMeasure,
+    saveCurrentMeasureAndCreateNew: handleSaveCurrentMeasureAndCreateNew,
+    deleteCurrentMeasure: handleDeleteCurrentMeasure,
+    navigateToMeasure: handleNavigateToMeasure,
   };
 };
 

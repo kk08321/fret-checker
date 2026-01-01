@@ -8,6 +8,7 @@ import { GuitarNotesProvider } from "./contexts/GuitarNotesContext";
 import { KeySignatureProvider } from "./contexts/KeySignatureContext";
 import { TuningProvider } from "./contexts/TuningContext";
 import { AudioSettingsProvider } from "./contexts/AudioSettingsContext";
+import { MeasureProvider } from "./contexts/MeasureContext";
 import { NavigationBar } from "./components/NavigationBar";
 
 function App() {
@@ -16,6 +17,8 @@ function App() {
       <KeySignatureProvider>
         <TuningProvider>
           <AudioSettingsProvider>
+            {/* MeasureProvider: SheetPageとFretboardPage間で小節情報を共有するためのProvider */}
+            <MeasureProvider>
             <BrowserRouter>
             <div
               css={css`
@@ -44,6 +47,7 @@ function App() {
               <NavigationBar />
             </div>
             </BrowserRouter>
+            </MeasureProvider>
           </AudioSettingsProvider>
         </TuningProvider>
       </KeySignatureProvider>
