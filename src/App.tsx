@@ -7,6 +7,7 @@ import FretboardPage from "./FretboardPage";
 import { GuitarNotesProvider } from "./contexts/GuitarNotesContext";
 import { KeySignatureProvider } from "./contexts/KeySignatureContext";
 import { TuningProvider } from "./contexts/TuningContext";
+import { AudioSettingsProvider } from "./contexts/AudioSettingsContext";
 import { NavigationBar } from "./components/NavigationBar";
 
 function App() {
@@ -14,7 +15,8 @@ function App() {
     <GuitarNotesProvider>
       <KeySignatureProvider>
         <TuningProvider>
-          <BrowserRouter>
+          <AudioSettingsProvider>
+            <BrowserRouter>
             <div
               css={css`
                 width: 100vw;
@@ -41,7 +43,8 @@ function App() {
               </div>
               <NavigationBar />
             </div>
-          </BrowserRouter>
+            </BrowserRouter>
+          </AudioSettingsProvider>
         </TuningProvider>
       </KeySignatureProvider>
     </GuitarNotesProvider>

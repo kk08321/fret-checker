@@ -4,9 +4,11 @@ import Bar from "./Bar";
 import ControlPanel from "./components/ControlPanel";
 import { useSheetPage } from "./hooks/useSheetPage";
 import { useKeySignature } from "./contexts/KeySignatureContext";
+import { useAudioSettings } from "./contexts/AudioSettingsContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "./utils/keySignature";
 import { calculateNoteOffset } from "./utils/noteUtils";
 import { ModeBadge } from "./components/ModeBadge";
+import { playChord } from "./utils/audio";
 import {
   sheetWrapper,
   whiteBarWrapperCss,
@@ -38,6 +40,9 @@ function SheetPage() {
   } = useSheetPage();
   
   const { selectedKeySignature } = useKeySignature();
+  const { audioPlayback } = useAudioSettings();
+  
+  const isAudioEnabled = audioPlayback === "enabled";
 
   const handleClearSelection = () => {
     setSelectedNote(null);
@@ -81,6 +86,33 @@ function SheetPage() {
     setIsNaturalMode(enabled);
   };
 
+  const handlePlay = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (inputtedNoteNumbers.length > 0) {
+      console.log('Playing chord:', inputtedNoteNumbers);
+      playChord(inputtedNoteNumbers);
+    }
+  };
+
+  const handleButtonTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleButtonTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleButtonTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handlePlay(e);
+  };
+
   return (
     <div
       ref={pageWrapperRef}
@@ -97,6 +129,55 @@ function SheetPage() {
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={onEnter}
     >
+      {/* 再生ボタン */}
+      {isAudioEnabled && (
+        <button
+          onClick={handlePlay}
+          onTouchStart={handleButtonTouchStart}
+          onTouchMove={handleButtonTouchMove}
+          onTouchEnd={handleButtonTouchEnd}
+          disabled={inputtedNoteNumbers.length === 0}
+          css={css`
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            box-sizing: border-box;
+            
+            &:hover:not(:disabled) {
+              background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+              transform: scale(1.05);
+              box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+            }
+            
+            &:active:not(:disabled) {
+              transform: scale(0.95);
+            }
+            
+            &:disabled {
+              background: #ccc;
+              cursor: not-allowed;
+              opacity: 0.6;
+            }
+          `}
+          title="再生"
+        >
+          ▶
+        </button>
+      )}
       {isSharpMode && <ModeBadge label="シャープモード" symbol="#" />}
       {isFlatMode && <ModeBadge label="フラットモード" symbol="♭" />}
       {isNaturalMode && <ModeBadge label="ナチュラルモード" symbol="♮" />}

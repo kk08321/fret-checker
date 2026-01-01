@@ -3,7 +3,9 @@ import { convertNoteToGuitarPositions } from "../utils/midi";
 import { useGuitarNotes } from "../contexts/GuitarNotesContext";
 import { useKeySignature } from "../contexts/KeySignatureContext";
 import { useTuning } from "../contexts/TuningContext";
+import { useAudioSettings } from "../contexts/AudioSettingsContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
+import { playChord } from "../utils/audio";
 
 interface Coordinates {
   x: number;
@@ -20,6 +22,7 @@ export const useSheetPage = () => {
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { selectedKeySignature } = useKeySignature();
   const { tuning } = useTuning();
+  const { audioPlayback } = useAudioSettings();
   
   // inputtedNoteNumbersから動的にnotesを計算
   const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr, tuning));
@@ -42,6 +45,28 @@ export const useSheetPage = () => {
   }, [selectedNote]);
 
   const onEnter = () => {
+    // タッチ位置が再生ボタン周辺（左上70px x 70pxの範囲）かチェック
+    if (pageWrapperRef.current && touchCoordinates) {
+      const pageRect = pageWrapperRef.current.getBoundingClientRect();
+      // 再生ボタンは左上（top: 10px, left: 10px）にあり、サイズは50px x 50px
+      // マージンを考慮して70px x 70pxの範囲を無視
+      const buttonAreaLeft = pageRect.left;
+      const buttonAreaTop = pageRect.top;
+      const buttonAreaRight = pageRect.left + 70;
+      const buttonAreaBottom = pageRect.top + 70;
+      
+      if (
+        touchCoordinates.x >= buttonAreaLeft &&
+        touchCoordinates.x <= buttonAreaRight &&
+        touchCoordinates.y >= buttonAreaTop &&
+        touchCoordinates.y <= buttonAreaBottom
+      ) {
+        // 再生ボタン周辺の場合は処理をスキップ
+        setTouchCoordinates({ x: 0, y: -100 });
+        return;
+      }
+    }
+    
     // タッチ位置がControlPanelの範囲内かチェック
     if (controlWrapperRef.current && touchCoordinates) {
       const controlRect = controlWrapperRef.current.getBoundingClientRect();
@@ -125,6 +150,12 @@ export const useSheetPage = () => {
     // コンテキストを更新（notesはinputtedNoteNumbersから自動的に計算される）
     setInputtedNoteNumbers(noteNumbersCopy);
     console.log("useSheetPage - updating inputtedNoteNumbers:", noteNumbersCopy);
+    
+    // 更新されたすべての音符を同時に再生（和音として）- 設定で有効な場合のみ
+    if (audioPlayback === "enabled" && noteNumbersCopy.length > 0) {
+      playChord(noteNumbersCopy);
+    }
+    
     setTouchCoordinates({ x: 0, y: -100 });
   };
 

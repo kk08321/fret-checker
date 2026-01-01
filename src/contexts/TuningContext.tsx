@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { getCookie, setCookie } from "../utils/cookie";
 
 export type TuningType = "normal" | "dropD";
 
@@ -9,8 +10,23 @@ interface TuningContextType {
 
 const TuningContext = createContext<TuningContextType | undefined>(undefined);
 
+const COOKIE_NAME = "fret-checker-tuning";
+
 export const TuningProvider = ({ children }: { children: ReactNode }) => {
-  const [tuning, setTuning] = useState<TuningType>("normal");
+  // Cookieから初期値を読み込む
+  const [tuning, setTuningState] = useState<TuningType>(() => {
+    const saved = getCookie(COOKIE_NAME);
+    return (saved === "normal" || saved === "dropD") ? saved : "normal";
+  });
+
+  // 値が変更されたときにCookieに保存
+  useEffect(() => {
+    setCookie(COOKIE_NAME, tuning);
+  }, [tuning]);
+
+  const setTuning = (newTuning: TuningType) => {
+    setTuningState(newTuning);
+  };
 
   return (
     <TuningContext.Provider value={{ tuning, setTuning }}>
