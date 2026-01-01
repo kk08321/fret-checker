@@ -55,7 +55,9 @@ export const MeasureBar = ({
         right: 0;
         width: 100%;
         height: 50px;
-        background-color: #444;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -63,7 +65,7 @@ export const MeasureBar = ({
         padding: 0 10px;
         box-sizing: border-box;
         z-index: 999;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       `}
     >
       {/* -ボタン */}
@@ -74,10 +76,10 @@ export const MeasureBar = ({
         css={css`
           width: 44px;
           height: 44px;
-          border-radius: 8px;
-          border: 2px solid #ef9a9a;
-          background-color: ${totalMeasures <= 1 ? '#ccc' : '#ffcdd2'};
-          color: ${totalMeasures <= 1 ? '#888' : '#c62828'};
+          border-radius: 10px;
+          border: 1px solid ${totalMeasures <= 1 ? '#ddd' : '#ef9a9a'};
+          background-color: ${totalMeasures <= 1 ? '#e0e0e0' : '#ffebee'};
+          color: ${totalMeasures <= 1 ? '#999' : '#c62828'};
           font-size: 24px;
           font-weight: bold;
           cursor: ${totalMeasures <= 1 ? 'not-allowed' : 'pointer'};
@@ -86,10 +88,10 @@ export const MeasureBar = ({
           justify-content: center;
           transition: all 0.2s;
           box-sizing: border-box;
-          opacity: ${totalMeasures <= 1 ? 0.5 : 1};
+          opacity: ${totalMeasures <= 1 ? 0.6 : 1};
           
           &:hover:not(:disabled) {
-            background-color: #ef9a9a;
+            background-color: #ffcdd2;
             transform: scale(1.05);
           }
           
@@ -118,10 +120,10 @@ export const MeasureBar = ({
           css={css`
             width: 48px;
             height: 44px;
-            border-radius: 8px;
-            border: 2px solid #666;
-            background-color: ${currentMeasureIndex === 0 ? '#555' : '#666'};
-            color: white;
+            border-radius: 10px;
+            border: 1px solid ${currentMeasureIndex === 0 ? '#ddd' : '#bbb'};
+            background-color: ${currentMeasureIndex === 0 ? '#f0f0f0' : '#fff'};
+            color: ${currentMeasureIndex === 0 ? '#bbb' : '#333'};
             font-size: 22px;
             cursor: ${currentMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
             display: flex;
@@ -129,10 +131,11 @@ export const MeasureBar = ({
             justify-content: center;
             transition: all 0.2s;
             box-sizing: border-box;
-            opacity: ${currentMeasureIndex === 0 ? 0.5 : 1};
+            opacity: ${currentMeasureIndex === 0 ? 0.6 : 1};
             
             &:hover:not(:disabled) {
-              background-color: #777;
+              background-color: #f5f5f5;
+              border-color: #999;
               transform: scale(1.05);
             }
             
@@ -148,7 +151,7 @@ export const MeasureBar = ({
         {/* 小節数ラベル */}
         <div
           css={css`
-            color: white;
+            color: #333;
             font-size: 16px;
             font-weight: bold;
             min-width: 60px;
@@ -166,10 +169,10 @@ export const MeasureBar = ({
           css={css`
             width: 48px;
             height: 44px;
-            border-radius: 8px;
-            border: 2px solid #666;
-            background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#555' : '#666'};
-            color: white;
+            border-radius: 10px;
+            border: 1px solid ${currentMeasureIndex >= totalMeasures - 1 ? '#ddd' : '#bbb'};
+            background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#f0f0f0' : '#fff'};
+            color: ${currentMeasureIndex >= totalMeasures - 1 ? '#bbb' : '#333'};
             font-size: 22px;
             cursor: ${currentMeasureIndex >= totalMeasures - 1 ? 'not-allowed' : 'pointer'};
             display: flex;
@@ -177,10 +180,11 @@ export const MeasureBar = ({
             justify-content: center;
             transition: all 0.2s;
             box-sizing: border-box;
-            opacity: ${currentMeasureIndex >= totalMeasures - 1 ? 0.5 : 1};
+            opacity: ${currentMeasureIndex >= totalMeasures - 1 ? 0.6 : 1};
             
             &:hover:not(:disabled) {
-              background-color: #777;
+              background-color: #f5f5f5;
+              border-color: #999;
               transform: scale(1.05);
             }
             
@@ -201,9 +205,9 @@ export const MeasureBar = ({
         css={css`
           width: 44px;
           height: 44px;
-          border-radius: 8px;
-          border: 2px solid #a5d6a7;
-          background-color: #c8e6c9;
+          border-radius: 10px;
+          border: 1px solid #a5d6a7;
+          background-color: #e8f5e9;
           color: #2e7d32;
           font-size: 24px;
           font-weight: bold;
@@ -215,7 +219,8 @@ export const MeasureBar = ({
           box-sizing: border-box;
           
           &:hover {
-            background-color: #a5d6a7;
+            background-color: #c8e6c9;
+            border-color: #81c784;
             transform: scale(1.05);
           }
           

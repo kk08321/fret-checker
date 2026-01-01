@@ -56,29 +56,29 @@ function Bar(props: BarProps) {
       {/* 調号記号の表示 */}
       {props.showKeySignatureSharp && (
         <div css={getKeySignatureSharpStyle(props.keySignatureIndex ?? 0)}>
-          <AccidentalIcon type="sharp" size={60} />
+          <AccidentalIcon type="sharp" size={54} filter="brightness(0) opacity(0.6)" />
         </div>
       )}
       {props.showKeySignatureFlat && (
         <div css={getKeySignatureFlatStyle(props.keySignatureIndex ?? 0)}>
-          <AccidentalIcon type="flat" size={60} />
+          <AccidentalIcon type="flat" size={54} filter="brightness(0) opacity(0.6)" />
         </div>
       )}
       {props.isInputted && props.noteNumber !== null && (
         <>
           {props.isSharp && (
             <div css={getSharpStyle(props.horizontalOffset)}>
-              <AccidentalIcon type="sharp" size={60} />
+              <AccidentalIcon type="sharp" size={54} filter="brightness(0) opacity(0.6)" />
             </div>
           )}
           {props.isFlat && (
             <div css={getFlatStyle(props.horizontalOffset)}>
-              <AccidentalIcon type="flat" size={60} />
+              <AccidentalIcon type="flat" size={54} filter="brightness(0) opacity(0.6)" />
             </div>
           )}
           {props.isNatural && (
             <div css={getNaturalStyle(props.horizontalOffset)}>
-              <AccidentalIcon type="natural" size={60} />
+              <AccidentalIcon type="natural" size={54} filter="brightness(0) opacity(0.6)" />
             </div>
           )}
           <div css={getNoteEllipseStyle(props.horizontalOffset)}>
@@ -96,9 +96,9 @@ const selected = css`
 
 const accidentalBaseStyle = (offset: number = 0) => css`
   position: absolute;
-  left: calc(70% - 25px - 60px - 8px + ${offset}px);
-  width: 60px;
-  height: 65px;
+  left: calc(70% - 25px - 54px - 8px + ${offset}px);
+  width: 54px;
+  height: 59px;
   z-index: 201;
   display: flex;
   align-items: center;
@@ -144,10 +144,8 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   color: white;
   font-size: 18px;
   font-weight: bold;
-  box-shadow: 
-    0 3px 4px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  border: 1px solid #999;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
   z-index: 200;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -159,8 +157,8 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
 const keySignatureBaseStyle = (index: number = 0) => css`
   position: absolute;
   left: calc(85px + ${index * 10}px);
-  width: 60px;
-  height: 65px;
+  width: 54px;
+  height: 59px;
   z-index: 60;
   display: flex;
   align-items: center;

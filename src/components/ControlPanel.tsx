@@ -28,7 +28,6 @@ const iconButtonBase = css`
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   
   svg {
     width: 28px;
@@ -38,75 +37,63 @@ const iconButtonBase = css`
   
   &:active {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
 `;
 
-// 各ボタンの個別スタイル
-const sharpButton = css`
-  background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+// すりガラス風の共通スタイル
+const glassButtonStyle = css`
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
   
   &:hover {
-    background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%);
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
   
   &:active {
-    background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
+`;
+
+// 各ボタンの個別スタイル（全てすりガラス風に統一）
+const sharpButton = css`
+  ${glassButtonStyle};
 `;
 
 const flatButton = css`
-  background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
-  
-  &:hover {
-    background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
-  }
-  
-  &:active {
-    background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
-  }
+  ${glassButtonStyle};
 `;
 
 const naturalButton = css`
-  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
-  
-  &:hover {
-    background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
-  }
-  
-  &:active {
-    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
-  }
+  ${glassButtonStyle};
 `;
 
 const undoButton = css`
-  background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
-  
-  &:hover {
-    background: linear-gradient(135deg, #fff59d 0%, #fff176 100%);
-  }
-  
-  &:active {
-    background: linear-gradient(135deg, #fff176 0%, #ffee58 100%);
-  }
+  ${glassButtonStyle};
 `;
 
 const clearButton = css`
-  background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
-  
-  &:hover {
-    background: linear-gradient(135deg, #ef9a9a 0%, #e57373 100%);
-  }
-  
-  &:active {
-    background: linear-gradient(135deg, #e57373 0%, #ef5350 100%);
-  }
+  ${glassButtonStyle};
 `;
 
 const iconButtonActive = css`
-  box-shadow: 0 0 20px rgba(74, 144, 226, 0.8), 0 4px 8px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 
+    0 0 20px rgba(74, 144, 226, 0.4),
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
   transform: scale(1.1);
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(74, 144, 226, 0.5) !important;
 `;
 
 function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {

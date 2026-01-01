@@ -66,7 +66,7 @@ export const whiteBarWrapperCss = css`
 
 const barCss = css`
   width: 100%;
-  height: 20%;
+  height: 8%;
   position: relative;
   top: 50%;
   left: 50%;
@@ -78,12 +78,12 @@ const barCss = css`
 
 export const blackLongBarCss = css`
   ${barCss};
-  background-color: black;
+  background-color: #4a4a4a;
 `;
 
 export const blackShortBarCss = css`
   ${barCss};
-  background-color: black;
+  background-color: #4a4a4a;
   width: 25%;
   left: 70%;
 `;
