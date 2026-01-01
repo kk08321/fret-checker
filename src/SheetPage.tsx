@@ -2,6 +2,7 @@
 import { css } from "@emotion/react";
 import Bar from "./Bar";
 import ControlPanel from "./components/ControlPanel";
+import { MeasureBar } from "./components/MeasureBar";
 import { useSheetPage } from "./hooks/useSheetPage";
 import { useKeySignature } from "./contexts/KeySignatureContext";
 import { useAudioSettings } from "./contexts/AudioSettingsContext";
@@ -37,6 +38,11 @@ function SheetPage() {
     setIsFlatMode,
     isNaturalMode,
     setIsNaturalMode,
+    measures,
+    currentMeasureIndex,
+    saveCurrentMeasureAndCreateNew,
+    deleteCurrentMeasure,
+    navigateToMeasure,
   } = useSheetPage();
   
   const { selectedKeySignature } = useKeySignature();
@@ -121,6 +127,7 @@ function SheetPage() {
         height: 100%;
         display: flex;
         flex-direction: column;
+        padding-top: 50px;
         padding-bottom: 60px;
         box-sizing: border-box;
         position: relative;
@@ -129,6 +136,13 @@ function SheetPage() {
       onTouchMove={setCoordinatesByTouchEvent}
       onTouchEnd={onEnter}
     >
+      <MeasureBar
+        currentMeasureIndex={currentMeasureIndex}
+        totalMeasures={measures.length}
+        onAddMeasure={saveCurrentMeasureAndCreateNew}
+        onDeleteMeasure={deleteCurrentMeasure}
+        onNavigateMeasure={navigateToMeasure}
+      />
       {/* 再生ボタン */}
       {isAudioEnabled && (
         <button
@@ -139,15 +153,15 @@ function SheetPage() {
           disabled={inputtedNoteNumbers.length === 0}
           css={css`
             position: absolute;
-            top: 10px;
+            top: 60px;
             left: 10px;
             z-index: 100;
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            border: 2px solid #333;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
+            border: 2px solid #81d4fa;
+            background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
+            color: #0277bd;
             font-size: 20px;
             cursor: pointer;
             display: flex;
@@ -158,7 +172,7 @@ function SheetPage() {
             box-sizing: border-box;
             
             &:hover:not(:disabled) {
-              background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+              background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
               transform: scale(1.05);
               box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
             }

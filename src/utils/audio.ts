@@ -21,7 +21,6 @@ export const noteStringToMidi = (noteStr: string): number => {
   // シャープ、フラット、ナチュラル記号を除去して数値に変換
   const isSharp = noteStr.endsWith('#');
   const isFlat = noteStr.endsWith('b');
-  const isNatural = noteStr.endsWith('n');
   const noteNumStr = noteStr.replace('#', '').replace('b', '').replace('n', '');
   const noteNum = parseInt(noteNumStr, 10);
   

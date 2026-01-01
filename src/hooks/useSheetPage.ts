@@ -24,6 +24,12 @@ export const useSheetPage = () => {
   const { tuning } = useTuning();
   const { audioPlayback } = useAudioSettings();
   
+  // 小節管理の状態
+  const [measures, setMeasures] = useState<string[][]>([[]]); // 小節の配列（各小節は音符の配列）
+  const [currentMeasureIndex, setCurrentMeasureIndex] = useState(0); // 現在の小節インデックス
+  const isLoadingMeasureRef = useRef(false); // 小節読み込み中フラグ（無限ループを防ぐ）
+  const currentMeasureIndexRef = useRef(0); // currentMeasureIndexの最新値を保持
+  
   // inputtedNoteNumbersから動的にnotesを計算
   const notes = inputtedNoteNumbers.map(noteNumStr => convertNoteToGuitarPositions(noteNumStr, tuning));
   
@@ -45,15 +51,34 @@ export const useSheetPage = () => {
   }, [selectedNote]);
 
   const onEnter = () => {
+    // タッチ位置がMeasureBarの範囲内（画面上部50px）かチェック
+    if (touchCoordinates) {
+      const measureBarTop = 0;
+      const measureBarBottom = 50;
+      
+      if (
+        touchCoordinates.y >= measureBarTop &&
+        touchCoordinates.y <= measureBarBottom
+      ) {
+        // MeasureBarの範囲内の場合はnote入力をスキップ
+        setIsSharpMode(false);
+        setIsFlatMode(false);
+        setIsNaturalMode(false);
+        setTouchCoordinates({ x: 0, y: -100 });
+        return;
+      }
+    }
+
     // タッチ位置が再生ボタン周辺（左上70px x 70pxの範囲）かチェック
     if (pageWrapperRef.current && touchCoordinates) {
       const pageRect = pageWrapperRef.current.getBoundingClientRect();
-      // 再生ボタンは左上（top: 10px, left: 10px）にあり、サイズは50px x 50px
+      // 再生ボタンはpageWrapper内でtop: 60px, left: 10pxにあり、サイズは50px x 50px
+      // pageWrapperにはpadding-top: 50pxがあるので、pageRect.topは既に50px下にずれている
       // マージンを考慮して70px x 70pxの範囲を無視
       const buttonAreaLeft = pageRect.left;
-      const buttonAreaTop = pageRect.top;
+      const buttonAreaTop = pageRect.top + 60 - 10; // ボタン位置(60px) - マージン(10px) = 50px
       const buttonAreaRight = pageRect.left + 70;
-      const buttonAreaBottom = pageRect.top + 70;
+      const buttonAreaBottom = pageRect.top + 60 + 60; // ボタン位置(60px) + ボタン高さ(50px) + マージン(10px) = 120px
       
       if (
         touchCoordinates.x >= buttonAreaLeft &&
@@ -159,6 +184,94 @@ export const useSheetPage = () => {
     setTouchCoordinates({ x: 0, y: -100 });
   };
 
+  // currentMeasureIndexの変更をrefに反映
+  useEffect(() => {
+    currentMeasureIndexRef.current = currentMeasureIndex;
+  }, [currentMeasureIndex]);
+
+  // inputtedNoteNumbersが変更されたときに、現在の小節に保存する
+  useEffect(() => {
+    if (!isLoadingMeasureRef.current) {
+      setMeasures(prevMeasures => {
+        const newMeasures = [...prevMeasures];
+        const currentIndex = currentMeasureIndexRef.current;
+        if (newMeasures[currentIndex] !== undefined) {
+          newMeasures[currentIndex] = [...inputtedNoteNumbers];
+        }
+        return newMeasures;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputtedNoteNumbers]);
+
+  // 小節を保存して新規小節を作成
+  const saveCurrentMeasureAndCreateNew = () => {
+    const currentNotes = [...inputtedNoteNumbers];
+    const newMeasures = [...measures];
+    newMeasures[currentMeasureIndex] = currentNotes; // 現在の小節を保存
+    newMeasures.push([]); // 新規小節を追加
+    setMeasures(newMeasures);
+    isLoadingMeasureRef.current = true;
+    setCurrentMeasureIndex(newMeasures.length - 1);
+    setInputtedNoteNumbers([]); // 新規小節なので空にする
+    isLoadingMeasureRef.current = false;
+  };
+
+  // 現在の小節を削除
+  const deleteCurrentMeasure = () => {
+    // 小節が1つだけの場合は削除しない（空の小節を1つ残す）
+    if (measures.length <= 1) {
+      return;
+    }
+
+    isLoadingMeasureRef.current = true;
+    const newMeasures = [...measures];
+    newMeasures.splice(currentMeasureIndex, 1); // 現在の小節を削除
+    
+    // 削除後のインデックスを決定
+    let newIndex: number;
+    if (currentMeasureIndex === measures.length - 1) {
+      // 最後の小節を削除した場合は、新しい最後の小節に移動
+      newIndex = newMeasures.length - 1;
+    } else {
+      // それ以外の場合は、前の小節に移動（インデックスを1つ減らす）
+      newIndex = currentMeasureIndex - 1;
+      if (newIndex < 0) {
+        newIndex = 0;
+      }
+    }
+    
+    setMeasures(newMeasures);
+    setCurrentMeasureIndex(newIndex);
+    setInputtedNoteNumbers([...newMeasures[newIndex]]);
+    isLoadingMeasureRef.current = false;
+  };
+
+  // 小節間を移動
+  const navigateToMeasure = (direction: 'prev' | 'next') => {
+    const currentNotes = [...inputtedNoteNumbers];
+    const newMeasures = [...measures];
+    newMeasures[currentMeasureIndex] = currentNotes; // 現在の入力を保存
+    
+    if (direction === 'prev' && currentMeasureIndex > 0) {
+      setMeasures(newMeasures);
+      isLoadingMeasureRef.current = true;
+      const targetIndex = currentMeasureIndex - 1;
+      setCurrentMeasureIndex(targetIndex);
+      setInputtedNoteNumbers([...newMeasures[targetIndex]]);
+      isLoadingMeasureRef.current = false;
+    } else if (direction === 'next' && currentMeasureIndex < measures.length - 1) {
+      setMeasures(newMeasures);
+      isLoadingMeasureRef.current = true;
+      const targetIndex = currentMeasureIndex + 1;
+      setCurrentMeasureIndex(targetIndex);
+      setInputtedNoteNumbers([...newMeasures[targetIndex]]);
+      isLoadingMeasureRef.current = false;
+    } else {
+      setMeasures(newMeasures);
+    }
+  };
+
   return {
     touchCoordinates,
     setTouchCoordinates,
@@ -178,6 +291,12 @@ export const useSheetPage = () => {
     setIsFlatMode,
     isNaturalMode,
     setIsNaturalMode,
+    // 小節管理関連
+    measures,
+    currentMeasureIndex,
+    saveCurrentMeasureAndCreateNew,
+    deleteCurrentMeasure,
+    navigateToMeasure,
   };
 };
 
