@@ -22,31 +22,91 @@ const iconButtonBase = css`
   width: 50px;
   height: 50px;
   border-radius: 25px;
-  background-color: #888;
   margin: 10px auto;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   
   svg {
     width: 28px;
     height: 28px;
-    color: white;
+    color: rgba(0, 0, 0, 0.7);
   }
   
   &:active {
-    background-color: #666;
     transform: scale(0.95);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+// 各ボタンの個別スタイル
+const sharpButton = css`
+  background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #ffcc80 0%, #ffb74d 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+  }
+`;
+
+const flatButton = css`
+  background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+  }
+`;
+
+const naturalButton = css`
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #a5d6a7 0%, #81c784 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+  }
+`;
+
+const undoButton = css`
+  background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #fff59d 0%, #fff176 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, #fff176 0%, #ffee58 100%);
+  }
+`;
+
+const clearButton = css`
+  background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #ef9a9a 0%, #e57373 100%);
+  }
+  
+  &:active {
+    background: linear-gradient(135deg, #e57373 0%, #ef5350 100%);
   }
 `;
 
 const iconButtonActive = css`
-  background-color: #4a90e2;
-  box-shadow: 0 0 15px rgba(74, 144, 226, 0.6);
+  box-shadow: 0 0 20px rgba(74, 144, 226, 0.8), 0 4px 8px rgba(0, 0, 0, 0.3);
   transform: scale(1.1);
-  border: 2px solid #2e5c8a;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 `;
 
 function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
@@ -129,7 +189,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         <div 
           ref={sharpIconRef}
           css={[
-            iconButtonBase, 
+            iconButtonBase,
+            sharpButton,
             isSharpMode && iconButtonActive,
             css`
               touch-action: none;
@@ -139,7 +200,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           <AccidentalIcon 
             type="sharp" 
             size={28}
-            filter="brightness(0) invert(1)"
+            filter="brightness(0)"
           />
         </div>
       </div>
@@ -147,7 +208,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         <div 
           ref={flatIconRef}
           css={[
-            iconButtonBase, 
+            iconButtonBase,
+            flatButton,
             isFlatMode && iconButtonActive,
             css`
               touch-action: none;
@@ -157,7 +219,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           <AccidentalIcon 
             type="flat" 
             size={28}
-            filter="brightness(0) invert(1)"
+            filter="brightness(0)"
           />
         </div>
       </div>
@@ -165,7 +227,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         <div 
           ref={naturalIconRef}
           css={[
-            iconButtonBase, 
+            iconButtonBase,
+            naturalButton,
             isNaturalMode && iconButtonActive,
             css`
               touch-action: none;
@@ -175,12 +238,12 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           <AccidentalIcon 
             type="natural" 
             size={28}
-            filter="brightness(0) invert(1)"
+            filter="brightness(0)"
           />
         </div>
       </div>
       <div css={iconContainer} onClick={handleUndoClick}>
-        <div css={iconButtonBase}>
+        <div css={[iconButtonBase, undoButton]}>
           <svg
             fill="none"
             stroke="currentColor"
@@ -195,7 +258,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
         </div>
       </div>
       <div css={iconContainer} onClick={handleClearClick}>
-        <div css={iconButtonBase}>
+        <div css={[iconButtonBase, clearButton]}>
           <svg
             fill="none"
             stroke="currentColor"

@@ -137,7 +137,7 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   width: 50px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #EEE 0%, #999 50%, #BBB 100%);
+  background: linear-gradient(135deg, #888 0%, #555 50%, #666 100%);
   display: flex;
   align-items: center;
   justify-content: center;

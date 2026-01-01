@@ -37,6 +37,10 @@ export const MeasureBar = ({
   const handleDeleteClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // 非活性の時は何もしない
+    if (totalMeasures <= 1) {
+      return;
+    }
     if (window.confirm('この小節を削除してもよろしいですか？')) {
       onDeleteMeasure();
     }
