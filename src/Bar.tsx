@@ -134,8 +134,9 @@ const getNoteEllipseStyle = (offset: number = 0) => css`
   top: 50%;
   transform: translateY(-50%);
   -webkit-transform: translateY(-50%);
-  width: 50px;
-  height: 40px;
+  width: 10%;
+  max-width: 40px;
+  height: 150%;
   border-radius: 50%;
   background: linear-gradient(135deg, #888 0%, #555 50%, #666 100%);
   display: flex;

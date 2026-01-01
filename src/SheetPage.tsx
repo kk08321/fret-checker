@@ -293,12 +293,12 @@ function SheetPage() {
           }
           
           // ナチュラル付きかどうかを判定
-          const isNatural = isInputted && inputtedNoteNumbers[noteIndex].includes('n');
+          const isNatural = isInputted && noteIndex !== -1 && inputtedNoteNumbers[noteIndex]?.includes('n');
           
           // シャープ付きかどうかを判定（調号により自動適用されたものは除外、ナチュラルが付いている場合は表示しない）
-          const isSharp = isInputted && inputtedNoteNumbers[noteIndex].includes('#') && !isKeySignatureSharp && !isNatural;
+          const isSharp = isInputted && noteIndex !== -1 && inputtedNoteNumbers[noteIndex]?.includes('#') && !isKeySignatureSharp && !isNatural;
           // フラット付きかどうかを判定（調号により自動適用されたものは除外、ナチュラルが付いている場合は表示しない）
-          const isFlat = isInputted && inputtedNoteNumbers[noteIndex].includes('b') && !isKeySignatureFlat && !isNatural;
+          const isFlat = isInputted && noteIndex !== -1 && inputtedNoteNumbers[noteIndex]?.includes('b') && !isKeySignatureFlat && !isNatural;
           
           return (
             <Bar

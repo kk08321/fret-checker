@@ -1,8 +1,34 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { useRef, useEffect } from "react";
-import { controlWrapper, messageWrapper, fretLabel } from "../styles/sheetPageStyles";
+import { controlWrapper, messageWrapper } from "../styles/sheetPageStyles";
 import { AccidentalIcon } from "./AccidentalIcon";
+
+// 運指候補文字列を解析する関数
+interface ParsedNote {
+  noteName: string; // 例: "E4"
+  positions: string[]; // 例: ["1弦0F", "2弦5F", "3弦9F"]
+}
+
+const parseNoteString = (noteStr: string): ParsedNote | null => {
+  // 形式: "ド E4 1弦0F or 2弦5F or 3弦9F" または "ド E4 (押弦不可)"
+  // または "ド E♭4 1弦0F or 2弦5F or 3弦9F" など（フラット記号は♭で表示される）
+  // 音名とオクターブを抽出（日本語名と押弦位置の間）
+  // #（シャープ）と♭（フラット）の両方を認識
+  const noteNameMatch = noteStr.match(/\s([A-G][#♭]?\d+)\s/);
+  if (!noteNameMatch) return null;
+  
+  const noteName = noteNameMatch[1];
+  
+  // 押弦位置を抽出（"X弦YF"のパターンを全て抽出）
+  const positionMatches = noteStr.matchAll(/(\d+)弦(\d+)F/g);
+  const positions: string[] = [];
+  for (const match of positionMatches) {
+    positions.push(`${match[1]}弦${match[2]}F`);
+  }
+  
+  return { noteName, positions };
+};
 
 interface ControlPanelProps {
   notes: string[];
@@ -25,20 +51,20 @@ const plateContainer = css`
   justify-content: center;
   background: #fafafa;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 30px;
-  padding: 8px 4px;
+  border-radius: 24px;
+  padding: 5px 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin: 4px auto;
   max-width: fit-content;
   box-sizing: border-box;
-  gap: 4px;
+  gap: 8px;
 `;
 
 // 共通のアイコンボタンスタイル（プレート内用）
 const iconButtonBase = css`
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
+  width: 42px;
+  height: 42px;
+  border-radius: 21px;
   margin: 0;
   cursor: pointer;
   display: flex;
@@ -50,8 +76,8 @@ const iconButtonBase = css`
   box-shadow: none;
   
   svg {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     color: rgba(0, 0, 0, 0.7);
   }
   
@@ -123,9 +149,9 @@ const iconButtonActive = css`
 // グループ区切り線
 const groupDivider = css`
   width: 1px;
-  height: 36px;
+  height: 30px;
   background: rgba(0, 0, 0, 0.1);
-  margin: 0 4px;
+  margin: 0 6px;
   flex-shrink: 0;
 `;
 
@@ -496,7 +522,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 4px 0;
+    padding: 2px 0;
     box-sizing: border-box;
     flex-wrap: nowrap;
   `;
@@ -516,8 +542,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
               isSharpMode && iconButtonActive,
               css`
                 touch-action: none;
-                width: 50px;
-                height: 50px;
+                width: 42px;
+                height: 42px;
                 -webkit-tap-highlight-color: transparent;
                 user-select: none;
                 -webkit-user-select: none;
@@ -526,7 +552,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           >
             <AccidentalIcon 
               type="sharp" 
-              size={28}
+              size={24}
               filter="brightness(0)"
             />
           </div>
@@ -539,8 +565,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
               isFlatMode && iconButtonActive,
               css`
                 touch-action: none;
-                width: 50px;
-                height: 50px;
+                width: 42px;
+                height: 42px;
                 -webkit-tap-highlight-color: transparent;
                 user-select: none;
                 -webkit-user-select: none;
@@ -549,7 +575,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           >
             <AccidentalIcon 
               type="flat" 
-              size={28}
+              size={24}
               filter="brightness(0)"
             />
           </div>
@@ -562,8 +588,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
               isNaturalMode && iconButtonActive,
               css`
                 touch-action: none;
-                width: 50px;
-                height: 50px;
+                width: 42px;
+                height: 42px;
                 -webkit-tap-highlight-color: transparent;
                 user-select: none;
                 -webkit-user-select: none;
@@ -572,7 +598,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           >
             <AccidentalIcon 
               type="natural" 
-              size={28}
+              size={24}
               filter="brightness(0)"
             />
           </div>
@@ -587,8 +613,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
               iconButtonBase, 
               undoButton,
               css`
-                min-width: 44px;
-                min-height: 44px;
+                min-width: 38px;
+                min-height: 38px;
               `
             ]}
           >
@@ -615,8 +641,8 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
               iconButtonBase, 
               clearButton,
               css`
-                min-width: 44px;
-                min-height: 44px;
+                min-width: 38px;
+                min-height: 38px;
               `
             ]}
           >
@@ -640,14 +666,128 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
           padding-bottom: ${isSafari 
             ? `calc(170px + env(safe-area-inset-bottom, 0px))` 
             : `60px`};
+          box-sizing: border-box;
         `
       ]}>
-        <p css={fretLabel}>{notes.length >= 1 && `1. ${notes[0]}`}</p>
-        <p css={fretLabel}>{notes.length >= 2 && `2. ${notes[1]}`}</p>
-        <p css={fretLabel}>{notes.length >= 3 && `3. ${notes[2]}`}</p>
-        <p css={fretLabel}>{notes.length >= 4 && `4. ${notes[3]}`}</p>
-        <p css={fretLabel}>{notes.length >= 5 && `5. ${notes[4]}`}</p>
-        <p css={fretLabel}>{notes.length >= 6 && `6. ${notes[5]}`}</p>
+        <div
+          css={css`
+            height: 12em;
+            max-height: 12em;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+          `}
+        >
+          {notes.slice(0, 6).map((note, index) => {
+          const parsed = parseNoteString(note);
+          if (!parsed) return null;
+          
+          return (
+            <div
+              key={index}
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 1px 0;
+                padding: 4px 8px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+                box-sizing: border-box;
+                min-height: 1.5em;
+              `}
+            >
+              {/* 番号バッジ */}
+              <div
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  min-width: 20px;
+                  height: 20px;
+                  background: rgba(0, 0, 0, 0.08);
+                  border-radius: 10px;
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: rgba(0, 0, 0, 0.7);
+                  flex-shrink: 0;
+                `}
+              >
+                {index + 1}
+              </div>
+              
+              {/* 音名（太字） */}
+              <span
+                css={css`
+                  font-weight: 700;
+                  font-size: 14px;
+                  line-height: 20px;
+                  color: rgba(0, 0, 0, 0.85);
+                  flex-shrink: 0;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  min-width: 36px;
+                `}
+              >
+                {parsed.noteName}
+              </span>
+              
+              {/* 押弦位置チップ */}
+              {parsed.positions.length > 0 && (
+                <div
+                  css={css`
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                    align-items: center;
+                  `}
+                >
+                  {parsed.positions.map((pos, posIndex) => (
+                    <span
+                      key={posIndex}
+                      css={css`
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 20px;
+                        padding: 0 6px;
+                        background: rgba(0, 0, 0, 0.06);
+                        border-radius: 4px;
+                        font-size: 11px;
+                        color: rgba(0, 0, 0, 0.7);
+                        white-space: nowrap;
+                        font-variant-numeric: tabular-nums;
+                        letter-spacing: 0.02em;
+                        box-sizing: border-box;
+                      `}
+                    >
+                      {pos}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              {/* 押弦不可の場合 */}
+              {parsed.positions.length === 0 && (
+                <span
+                  css={css`
+                    font-size: 11px;
+                    line-height: 20px;
+                    color: rgba(0, 0, 0, 0.5);
+                    font-style: italic;
+                    display: inline-flex;
+                    align-items: center;
+                  `}
+                >
+                  (押弦不可)
+                </span>
+              )}
+            </div>
+          );
+        })}
+        </div>
       </div>
     </div>
   );

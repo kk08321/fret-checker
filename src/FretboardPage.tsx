@@ -6,7 +6,6 @@ import { useTuning } from "./contexts/TuningContext";
 import { useMeasure } from "./contexts/MeasureContext";
 import { MeasureBar } from "./components/MeasureBar";
 import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
-import { parseNoteNumber } from "./utils/noteUtils";
 import { calculateFretHeights } from "./utils/fretboard";
 
 const NUM_FRETS = 20;
@@ -42,10 +41,16 @@ function FretboardPage() {
     const positions: Array<{ string: number; fret: number; noteIndex: number }> = [];
     
     inputtedNoteNumbers.forEach((noteNumStr, index) => {
-      const noteNum = parseNoteNumber(noteNumStr);
-      if (noteNum === null) return;
+      // シャープ記号とフラット記号が付いているかチェック
+      const isSharp = noteNumStr.endsWith('#');
+      const isFlat = noteNumStr.endsWith('b');
+      const noteNumWithoutAccidental = isSharp || isFlat ? noteNumStr.slice(0, -1) : noteNumStr;
+      const noteNum = parseInt(noteNumWithoutAccidental, 10);
+      if (isNaN(noteNum)) return;
       
-      const midi = noteNumberToMidi(noteNum);
+      const baseMidi = noteNumberToMidi(noteNum);
+      // 押弦位置の計算にはシャープ/フラット後のMIDIノート番号を使用
+      const midi = isSharp ? baseMidi + 1 : (isFlat ? baseMidi - 1 : baseMidi);
       const guitarPositions = getGuitarPositions(midi, tuning);
       
       // すべての押弦箇所を追加
