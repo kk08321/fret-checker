@@ -93,6 +93,7 @@ const barCss = css`
 export const blackLongBarCss = css`
   ${barCss};
   background-color: #4a4a4a;
+  height: 8.8%;
 `;
 
 export const blackShortBarCss = css`
@@ -100,6 +101,7 @@ export const blackShortBarCss = css`
   background-color: #4a4a4a;
   width: 25%;
   left: 70%;
+  height: 8.8%;
 `;
 
 export const whiteBarCss = css`

@@ -154,32 +154,33 @@ function SheetPage() {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            border: 2px solid #81d4fa;
-            background: linear-gradient(135deg, #b3e5fc 0%, #81d4fa 100%);
-            color: #0277bd;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.05);
+            color: rgba(0, 0, 0, 0.6);
             font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             transition: all 0.2s;
             box-sizing: border-box;
             
             &:hover:not(:disabled) {
-              background: linear-gradient(135deg, #81d4fa 0%, #4fc3f7 100%);
-              transform: scale(1.05);
-              box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+              background: rgba(0, 0, 0, 0.08);
+              border-color: rgba(0, 0, 0, 0.2);
+              color: rgba(0, 0, 0, 0.7);
             }
             
             &:active:not(:disabled) {
               transform: scale(0.95);
+              background: rgba(0, 0, 0, 0.1);
             }
             
             &:disabled {
-              background: #ccc;
+              background: rgba(0, 0, 0, 0.03);
               cursor: not-allowed;
-              opacity: 0.6;
+              opacity: 0.4;
             }
           `}
           title="再生"
