@@ -13,6 +13,20 @@ export const iconContainer = css`
   float: left;
 `;
 
+// ボタングループコンテナ
+export const buttonGroupContainer = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* グループ内のボタン間隔 */
+`;
+
+// ボタングループ間の余白
+export const buttonGroupSpacer = css`
+  width: 24px; /* グループ間の余白（グループ内間隔の3倍程度） */
+  flex-shrink: 0;
+`;
+
 export const icon = css`
   width: 50px;
   height: 50px;

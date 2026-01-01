@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { useRef, useEffect } from "react";
-import { controlWrapper, iconContainer, messageWrapper, fretLabel } from "../styles/sheetPageStyles";
+import { controlWrapper, messageWrapper, fretLabel } from "../styles/sheetPageStyles";
 import { AccidentalIcon } from "./AccidentalIcon";
 
 interface ControlPanelProps {
@@ -17,17 +17,36 @@ interface ControlPanelProps {
   isNaturalMode?: boolean;
 }
 
-// 共通のアイコンボタンスタイル
+// プレートコンテナ（5ボタンを包む単一のプレート）
+const plateContainer = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 30px;
+  padding: 8px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin: 4px auto;
+  max-width: fit-content;
+  box-sizing: border-box;
+  gap: 4px;
+`;
+
+// 共通のアイコンボタンスタイル（プレート内用）
 const iconButtonBase = css`
   width: 50px;
   height: 50px;
   border-radius: 25px;
-  margin: 10px auto;
+  margin: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  box-shadow: none;
   
   svg {
     width: 28px;
@@ -40,60 +59,73 @@ const iconButtonBase = css`
   }
 `;
 
-// すりガラス風の共通スタイル
-const glassButtonStyle = css`
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+// ボタンの基本スタイル（影なし、背景透明）
+const buttonBase = css`
+  background: transparent;
+  border: none;
+  box-shadow: none;
   
   &:hover {
-    background: rgba(255, 255, 255, 0.35);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.03);
   }
   
   &:active {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 
-      0 4px 16px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.05);
   }
 `;
 
-// 各ボタンの個別スタイル（全てすりガラス風に統一）
+// 各ボタンの個別スタイル
 const sharpButton = css`
-  ${glassButtonStyle};
+  ${buttonBase};
+  margin-right: 2px;
 `;
 
 const flatButton = css`
-  ${glassButtonStyle};
+  ${buttonBase};
+  margin-right: 2px;
 `;
 
 const naturalButton = css`
-  ${glassButtonStyle};
+  ${buttonBase};
 `;
 
 const undoButton = css`
-  ${glassButtonStyle};
+  ${buttonBase};
 `;
 
 const clearButton = css`
-  ${glassButtonStyle};
+  ${buttonBase};
+  
+  svg {
+    color: rgba(236, 100, 100, 0.8);
+  }
+  
+  &:hover {
+    background: rgba(236, 100, 100, 0.08);
+  }
+  
+  &:active {
+    background: rgba(236, 100, 100, 0.12);
+  }
 `;
 
+// 選択状態のスタイル（トグルボタン用）
 const iconButtonActive = css`
-  background: rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 
-    0 0 20px rgba(74, 144, 226, 0.4),
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
-  transform: scale(1.1);
-  border: 1px solid rgba(74, 144, 226, 0.5) !important;
+  background: rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+`;
+
+// グループ区切り線
+const groupDivider = css`
+  width: 1px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 0 4px;
+  flex-shrink: 0;
 `;
 
 function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
@@ -170,93 +202,136 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
     };
   }, [onNaturalModeStart]);
 
+  // ボタングループのコンテナスタイル
+  const buttonsWrapper = css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 4px 0;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+  `;
+
   return (
     <div css={controlWrapper} ref={controlWrapperRef}>
-      <div css={iconContainer}>
-        <div 
-          ref={sharpIconRef}
-          css={[
-            iconButtonBase,
-            sharpButton,
-            isSharpMode && iconButtonActive,
-            css`
-              touch-action: none;
-            `
-          ]}
-        >
-          <AccidentalIcon 
-            type="sharp" 
-            size={28}
-            filter="brightness(0)"
-          />
-        </div>
-      </div>
-      <div css={iconContainer}>
-        <div 
-          ref={flatIconRef}
-          css={[
-            iconButtonBase,
-            flatButton,
-            isFlatMode && iconButtonActive,
-            css`
-              touch-action: none;
-            `
-          ]}
-        >
-          <AccidentalIcon 
-            type="flat" 
-            size={28}
-            filter="brightness(0)"
-          />
-        </div>
-      </div>
-      <div css={iconContainer}>
-        <div 
-          ref={naturalIconRef}
-          css={[
-            iconButtonBase,
-            naturalButton,
-            isNaturalMode && iconButtonActive,
-            css`
-              touch-action: none;
-            `
-          ]}
-        >
-          <AccidentalIcon 
-            type="natural" 
-            size={28}
-            filter="brightness(0)"
-          />
-        </div>
-      </div>
-      <div css={iconContainer} onClick={handleUndoClick}>
-        <div css={[iconButtonBase, undoButton]}>
-          <svg
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            viewBox="0 0 24 24"
+      <div css={buttonsWrapper}>
+        {/* プレートコンテナ（5ボタンを包む単一のプレート） */}
+        <div css={plateContainer}>
+          {/* 左グループ: ♯, ♭, ♮ */}
+          <div 
+            ref={sharpIconRef}
+            css={[
+              iconButtonBase,
+              sharpButton,
+              isSharpMode && iconButtonActive,
+              css`
+                touch-action: none;
+                min-width: 44px;
+                min-height: 44px;
+              `
+            ]}
           >
-            <path d="M3 7v6h6" />
-            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-          </svg>
-        </div>
-      </div>
-      <div css={iconContainer} onClick={handleClearClick}>
-        <div css={[iconButtonBase, clearButton]}>
-          <svg
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            viewBox="0 0 24 24"
+            <AccidentalIcon 
+              type="sharp" 
+              size={28}
+              filter="brightness(0)"
+            />
+          </div>
+          <div 
+            ref={flatIconRef}
+            css={[
+              iconButtonBase,
+              flatButton,
+              isFlatMode && iconButtonActive,
+              css`
+                touch-action: none;
+                min-width: 44px;
+                min-height: 44px;
+              `
+            ]}
           >
-            <path d="M18 6L6 18" />
-            <path d="M6 6l12 12" />
-          </svg>
+            <AccidentalIcon 
+              type="flat" 
+              size={28}
+              filter="brightness(0)"
+            />
+          </div>
+          <div 
+            ref={naturalIconRef}
+            css={[
+              iconButtonBase,
+              naturalButton,
+              isNaturalMode && iconButtonActive,
+              css`
+                touch-action: none;
+                min-width: 44px;
+                min-height: 44px;
+              `
+            ]}
+          >
+            <AccidentalIcon 
+              type="natural" 
+              size={28}
+              filter="brightness(0)"
+            />
+          </div>
+
+          {/* グループ区切り線（♮と↩︎の間） */}
+          <div css={groupDivider} />
+
+          {/* 中グループ: ↩ (Undo) */}
+          <div 
+            onClick={handleUndoClick}
+            css={[
+              iconButtonBase, 
+              undoButton,
+              css`
+                min-width: 44px;
+                min-height: 44px;
+              `
+            ]}
+          >
+            <svg
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <path d="M3 7v6h6" />
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+            </svg>
+          </div>
+
+          {/* グループ区切り線（↩︎と✕の間） */}
+          <div css={groupDivider} />
+
+          {/* 右グループ: ✕ (Clear) */}
+          <div 
+            onClick={handleClearClick}
+            css={[
+              iconButtonBase, 
+              clearButton,
+              css`
+                min-width: 44px;
+                min-height: 44px;
+              `
+            ]}
+          >
+            <svg
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              viewBox="0 0 24 24"
+            >
+              <path d="M18 6L6 18" />
+              <path d="M6 6l12 12" />
+            </svg>
+          </div>
         </div>
       </div>
       <div css={[
