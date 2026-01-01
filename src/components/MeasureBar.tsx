@@ -37,7 +37,9 @@ export const MeasureBar = ({
   const handleDeleteClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onDeleteMeasure();
+    if (window.confirm('この小節を削除してもよろしいですか？')) {
+      onDeleteMeasure();
+    }
   };
 
   return (
@@ -106,28 +108,30 @@ export const MeasureBar = ({
         <button
           onClick={handleDeleteClick}
           onTouchEnd={handleDeleteClick}
+          disabled={totalMeasures <= 1}
           css={css`
             width: 40px;
             height: 40px;
             border-radius: 8px;
             border: 2px solid #ef9a9a;
-            background-color: #ffcdd2;
-            color: #c62828;
+            background-color: ${totalMeasures <= 1 ? '#ccc' : '#ffcdd2'};
+            color: ${totalMeasures <= 1 ? '#888' : '#c62828'};
             font-size: 24px;
             font-weight: bold;
-            cursor: pointer;
+            cursor: ${totalMeasures <= 1 ? 'not-allowed' : 'pointer'};
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
             box-sizing: border-box;
+            opacity: ${totalMeasures <= 1 ? 0.5 : 1};
             
-            &:hover {
+            &:hover:not(:disabled) {
               background-color: #ef9a9a;
               transform: scale(1.05);
             }
             
-            &:active {
+            &:active:not(:disabled) {
               transform: scale(0.95);
             }
           `}
