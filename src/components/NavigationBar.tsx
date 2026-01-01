@@ -129,9 +129,10 @@ export const NavigationBar = () => {
               color: white;
               font-size: 18px;
               gap: 4px;
-              background-color: ${isActive ? "#555" : "transparent"};
+              background-color: ${isActive ? "#4a5568" : "transparent"};
+              transition: background-color 0.2s ease;
               &:hover {
-                background-color: #444;
+                background-color: ${isActive ? "#4a5568" : "#444"};
               }
             `}
           >
@@ -144,9 +145,10 @@ export const NavigationBar = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                color: isActive ? "#4a9eff" : "white",
+                color: isActive ? "#60a5fa" : "white",
                 textDecoration: "none",
                 gap: "4px",
+                transition: "color 0.2s ease",
               }}
             >
               {item.icon}

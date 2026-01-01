@@ -11,7 +11,7 @@ export const ModeBadge = ({ label, symbol }: ModeBadgeProps) => {
     <div
       css={css`
         position: absolute;
-        top: 60px;
+        top: 58px;
         left: 50%;
         transform: translateX(-50%);
         -webkit-transform: translateX(-50%);

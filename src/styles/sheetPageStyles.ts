@@ -40,7 +40,7 @@ export const controlWrapper = css`
   border-top: 2px solid #444;
   position: relative;
   z-index: 101;
-  background-color: #eee;
+  background-color: #f5f5f5;
   box-sizing: border-box;
   clear: both;
 `;

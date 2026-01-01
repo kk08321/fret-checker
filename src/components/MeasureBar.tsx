@@ -72,8 +72,8 @@ export const MeasureBar = ({
         onTouchEnd={handleDeleteClick}
         disabled={totalMeasures <= 1}
         css={css`
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 8px;
           border: 2px solid #ef9a9a;
           background-color: ${totalMeasures <= 1 ? '#ccc' : '#ffcdd2'};
@@ -116,8 +116,8 @@ export const MeasureBar = ({
           onTouchEnd={handlePrevClick}
           disabled={currentMeasureIndex === 0}
           css={css`
-            width: 52px;
-            height: 48px;
+            width: 48px;
+            height: 44px;
             border-radius: 8px;
             border: 2px solid #666;
             background-color: ${currentMeasureIndex === 0 ? '#555' : '#666'};
@@ -164,8 +164,8 @@ export const MeasureBar = ({
           onTouchEnd={handleNextClick}
           disabled={currentMeasureIndex >= totalMeasures - 1}
           css={css`
-            width: 52px;
-            height: 48px;
+            width: 48px;
+            height: 44px;
             border-radius: 8px;
             border: 2px solid #666;
             background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#555' : '#666'};
@@ -199,8 +199,8 @@ export const MeasureBar = ({
         onClick={handleAddClick}
         onTouchEnd={handleAddClick}
         css={css`
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 8px;
           border: 2px solid #a5d6a7;
           background-color: #c8e6c9;

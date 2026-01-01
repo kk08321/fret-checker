@@ -147,7 +147,7 @@ function SheetPage() {
           disabled={inputtedNoteNumbers.length === 0}
           css={css`
             position: absolute;
-            top: 60px;
+            top: 55px;
             left: 10px;
             z-index: 200;
             width: 50px;

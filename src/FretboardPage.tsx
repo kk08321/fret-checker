@@ -85,7 +85,7 @@ function FretboardPage() {
         justify-content: flex-start;
         padding: 10px;
         padding-top: 60px;
-        padding-bottom: 70px;
+        padding-bottom: 65px;
         box-sizing: border-box;
         overflow-y: auto;
         overflow-x: hidden;
@@ -133,7 +133,7 @@ function FretboardPage() {
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  font-size: 12px;
+                  font-size: 13px;
                   font-weight: bold;
                   color: #333;
                   transform: translateX(-50%);
@@ -171,7 +171,7 @@ function FretboardPage() {
                   min-width: 30px;
                   width: 30px;
                   text-align: center;
-                  font-size: 11px;
+                  font-size: 12px;
                   font-weight: bold;
                   color: #333;
                   display: flex;
@@ -403,8 +403,9 @@ function FretboardPage() {
           css={css`
             margin-top: 30px;
             font-size: 18px;
-            color: #666;
+            color: #555;
             text-align: center;
+            line-height: 1.6;
           `}
         >
           五線譜ページで音符を入力すると、ここに押弦箇所が表示されます

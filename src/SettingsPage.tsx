@@ -28,9 +28,14 @@ export default function SettingsPage() {
   return (
     <div
       css={css`
+        width: 100%;
+        height: 100%;
         padding: 20px;
+        padding-bottom: 75px;
         max-width: 600px;
         margin: 0 auto;
+        box-sizing: border-box;
+        overflow-y: auto;
       `}
     >
       <h2
@@ -76,11 +81,16 @@ export default function SettingsPage() {
             background-repeat: no-repeat;
             background-position: right 12px center;
             padding-right: 40px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            
+            &:hover {
+              border-color: #bbb;
+            }
             
             &:focus {
               outline: none;
-              border-color: #4a90e2;
-              box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+              border-color: #60a5fa;
+              box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
             }
           `}
         >
@@ -126,11 +136,16 @@ export default function SettingsPage() {
             background-repeat: no-repeat;
             background-position: right 12px center;
             padding-right: 40px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            
+            &:hover {
+              border-color: #bbb;
+            }
             
             &:focus {
               outline: none;
-              border-color: #4a90e2;
-              box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+              border-color: #60a5fa;
+              box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
             }
           `}
         >
@@ -172,11 +187,16 @@ export default function SettingsPage() {
             background-repeat: no-repeat;
             background-position: right 12px center;
             padding-right: 40px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            
+            &:hover {
+              border-color: #bbb;
+            }
             
             &:focus {
               outline: none;
-              border-color: #4a90e2;
-              box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+              border-color: #60a5fa;
+              box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
             }
           `}
         >
