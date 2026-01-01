@@ -129,9 +129,15 @@ const playChordInternal = (audioContext: AudioContext, noteStrs: string[], durat
     const noteVolumeReduction = noteStrs.length === 1 ? 1.0 : Math.max(0.75, 1.0 - (noteStrs.length - 1) * 0.1);
     
     // 各音符に対してオシレーターを作成
-    noteStrs.forEach((noteStr) => {
+    // 「ジャラーン」と聞こえるように、各音符の再生開始時間を少しずつずらす
+    const staggerDelay = 0.03; // 各音符間の遅延時間（15ミリ秒）
+    
+    noteStrs.forEach((noteStr, index) => {
       const midi = noteStringToMidi(noteStr);
       const frequency = midiToFrequency(midi);
+      
+      // 各音符の開始時間を少しずつずらす（低い音から高い音へ）
+      const noteStartTime = now + index * staggerDelay;
       
       // メインオシレーター（基本音）- ノコギリ波で少しジャギーに
       const mainOsc = audioContext.createOscillator();
@@ -157,26 +163,26 @@ const playChordInternal = (audioContext: AudioContext, noteStrs: string[], durat
       // メインオシレーターのエンベロープ（和音の数に応じて音量を調整）
       const mainPeakVolume = 0.5 * noteVolumeReduction;
       const mainSustainVolume = sustainLevel * noteVolumeReduction;
-      mainGain.gain.setValueAtTime(0, now);
-      mainGain.gain.linearRampToValueAtTime(mainPeakVolume, now + attackTime);
-      mainGain.gain.linearRampToValueAtTime(mainSustainVolume, now + attackTime + decayTime);
-      mainGain.gain.linearRampToValueAtTime(mainSustainVolume, now + duration - releaseTime);
-      mainGain.gain.linearRampToValueAtTime(0, now + duration);
+      mainGain.gain.setValueAtTime(0, noteStartTime);
+      mainGain.gain.linearRampToValueAtTime(mainPeakVolume, noteStartTime + attackTime);
+      mainGain.gain.linearRampToValueAtTime(mainSustainVolume, noteStartTime + attackTime + decayTime);
+      mainGain.gain.linearRampToValueAtTime(mainSustainVolume, noteStartTime + duration - releaseTime);
+      mainGain.gain.linearRampToValueAtTime(0, noteStartTime + duration);
       
       // 2倍音のエンベロープ（和音の数に応じて音量を調整）
       const harmonic2PeakVolume = 0.12 * noteVolumeReduction;
       const harmonic2SustainVolume = 0.08 * noteVolumeReduction;
-      harmonic2Gain.gain.setValueAtTime(0, now);
-      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2PeakVolume, now + attackTime);
-      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2SustainVolume, now + attackTime + decayTime);
-      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2SustainVolume, now + duration - releaseTime);
-      harmonic2Gain.gain.linearRampToValueAtTime(0, now + duration);
+      harmonic2Gain.gain.setValueAtTime(0, noteStartTime);
+      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2PeakVolume, noteStartTime + attackTime);
+      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2SustainVolume, noteStartTime + attackTime + decayTime);
+      harmonic2Gain.gain.linearRampToValueAtTime(harmonic2SustainVolume, noteStartTime + duration - releaseTime);
+      harmonic2Gain.gain.linearRampToValueAtTime(0, noteStartTime + duration);
       
-      // 音を再生
-      mainOsc.start(now);
-      harmonic2Osc.start(now);
-      mainOsc.stop(now + duration);
-      harmonic2Osc.stop(now + duration);
+      // 音を再生（開始時間をずらす）
+      mainOsc.start(noteStartTime);
+      harmonic2Osc.start(noteStartTime);
+      mainOsc.stop(noteStartTime + duration);
+      harmonic2Osc.stop(noteStartTime + duration);
     });
     
     // 出力ゲインを調整（単音の時は0.3、和音の時は少しだけ下げる）

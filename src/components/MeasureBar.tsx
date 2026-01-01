@@ -116,13 +116,13 @@ export const MeasureBar = ({
           onTouchEnd={handlePrevClick}
           disabled={currentMeasureIndex === 0}
           css={css`
-            width: 40px;
-            height: 40px;
+            width: 52px;
+            height: 48px;
             border-radius: 8px;
             border: 2px solid #666;
             background-color: ${currentMeasureIndex === 0 ? '#555' : '#666'};
             color: white;
-            font-size: 18px;
+            font-size: 22px;
             cursor: ${currentMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
             display: flex;
             align-items: center;
@@ -164,13 +164,13 @@ export const MeasureBar = ({
           onTouchEnd={handleNextClick}
           disabled={currentMeasureIndex >= totalMeasures - 1}
           css={css`
-            width: 40px;
-            height: 40px;
+            width: 52px;
+            height: 48px;
             border-radius: 8px;
             border: 2px solid #666;
             background-color: ${currentMeasureIndex >= totalMeasures - 1 ? '#555' : '#666'};
             color: white;
-            font-size: 18px;
+            font-size: 22px;
             cursor: ${currentMeasureIndex >= totalMeasures - 1 ? 'not-allowed' : 'pointer'};
             display: flex;
             align-items: center;
