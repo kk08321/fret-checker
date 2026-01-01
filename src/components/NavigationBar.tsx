@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import React from "react";
 
 interface NavItem {
@@ -96,6 +96,9 @@ const navItems: NavItem[] = [
 ];
 
 export const NavigationBar = () => {
+  const location = useLocation();
+  const currentPath = location.pathname === "/" ? "/sheet/" : location.pathname;
+
   return (
     <div
       css={css`
@@ -113,6 +116,7 @@ export const NavigationBar = () => {
     >
       {navItems.map((item) => {
         const LinkComponent = Link as any;
+        const isActive = currentPath === item.path;
         return (
           <div
             key={item.path}
@@ -125,6 +129,7 @@ export const NavigationBar = () => {
               color: white;
               font-size: 18px;
               gap: 4px;
+              background-color: ${isActive ? "#555" : "transparent"};
               &:hover {
                 background-color: #444;
               }
@@ -139,7 +144,7 @@ export const NavigationBar = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "white",
+                color: isActive ? "#4a9eff" : "white",
                 textDecoration: "none",
                 gap: "4px",
               }}
