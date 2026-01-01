@@ -51,9 +51,12 @@ const iconButtonActive = css`
 
 function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSharpModeStart, isSharpMode = false, onFlatModeStart, isFlatMode = false, onNaturalModeStart, isNaturalMode = false }: ControlPanelProps) {
   // Safariかどうかを判定（Chromeを除外）
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && 
-                   !/chrome/i.test(navigator.userAgent) && 
-                   navigator.vendor === "Apple Computer, Inc.";
+  const isSafari = (
+    /safari/i.test(navigator.userAgent) && 
+    !/chrome/i.test(navigator.userAgent) && 
+    !/chromium/i.test(navigator.userAgent) &&
+    (navigator.vendor === "Apple Computer, Inc." || navigator.vendor === "")
+  ) || (window as any).safari !== undefined;
 
   const handleClearClick = (e: React.MouseEvent) => {
     e.preventDefault();
