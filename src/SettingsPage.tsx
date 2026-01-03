@@ -247,7 +247,7 @@ export default function SettingsPage() {
               }
             `}
           >
-            <span>入力音の再生</span>
+            <span>入力音のライブ再生</span>
             <div
               css={css`
                 position: relative;

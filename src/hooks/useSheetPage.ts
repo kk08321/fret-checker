@@ -230,7 +230,7 @@ export const useSheetPage = () => {
   useEffect(() => {
     if (measures[currentMeasureIndex] !== undefined) {
       isUpdatingFromMeasureRef.current = true;
-      setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
+      setInputtedNoteNumbers([...measures[currentMeasureIndex].notes]);
       isUpdatingFromMeasureRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
