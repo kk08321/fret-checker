@@ -1,17 +1,35 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 
 /**
+ * 音価の型定義
+ */
+export type NoteValue = 'whole' | 'half' | 'quarter' | 'eighth' | 'sixteenth';
+
+/**
+ * 小節情報の型定義
+ */
+export interface MeasureData {
+  notes: string[]; // 音符の配列
+  noteValue: NoteValue; // 小節の音価（デフォルトは'quarter'）
+  isDotted?: boolean; // 付点音符フラグ（音価×1.5）
+  isTriplet?: boolean; // 三連符フラグ
+}
+
+/**
  * MeasureContextの型定義
  * 小節情報の管理と操作に関する関数を提供
  */
 interface MeasureContextType {
-  measures: string[][]; // 全小節の配列（各小節は音符の配列）
+  measures: MeasureData[]; // 全小節の配列
   currentMeasureIndex: number; // 現在編集中の小節のインデックス
   setCurrentMeasureIndex: (index: number) => void;
   saveCurrentMeasureAndCreateNew: () => void; // 現在の小節を保存して新規小節を作成
   deleteCurrentMeasure: () => void; // 現在の小節を削除
   navigateToMeasure: (direction: 'prev' | 'next') => void; // 前後の小節に移動
   updateCurrentMeasure: (notes: string[]) => void; // 現在の小節の内容を更新
+  updateCurrentMeasureNoteValue: (noteValue: NoteValue) => void; // 現在の小節の音価を更新
+  updateCurrentMeasureDotted: (isDotted: boolean) => void; // 現在の小節の付点音符フラグを更新
+  updateCurrentMeasureTriplet: (isTriplet: boolean) => void; // 現在の小節の三連符フラグを更新
 }
 
 const MeasureContext = createContext<MeasureContextType | undefined>(undefined);
@@ -21,8 +39,8 @@ const MeasureContext = createContext<MeasureContextType | undefined>(undefined);
  * 小節情報をContextで管理し、SheetPageとFretboardPage間で共有する
  */
 export const MeasureProvider = ({ children }: { children: ReactNode }) => {
-  // 全小節の配列（各小節は音符の配列）
-  const [measures, setMeasures] = useState<string[][]>([[]]);
+  // 全小節の配列（各小節は音符の配列と音価を含む）
+  const [measures, setMeasures] = useState<MeasureData[]>([{ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }]);
   // 現在編集中の小節のインデックス
   const [currentMeasureIndex, setCurrentMeasureIndex] = useState(0);
   // 小節読み込み中フラグ（無限ループを防ぐため）
@@ -51,11 +69,68 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
         const newMeasures = [...prevMeasures];
         const currentIndex = currentMeasureIndexRef.current;
         if (newMeasures[currentIndex] !== undefined) {
-          newMeasures[currentIndex] = [...notes];
+          newMeasures[currentIndex] = {
+            ...newMeasures[currentIndex],
+            notes: [...notes],
+          };
         }
         return newMeasures;
       });
     }
+  };
+
+  /**
+   * 現在の小節の音価を更新
+   * @param noteValue 更新する音価
+   */
+  const updateCurrentMeasureNoteValue = (noteValue: NoteValue) => {
+    setMeasures(prevMeasures => {
+      const newMeasures = [...prevMeasures];
+      const currentIndex = currentMeasureIndexRef.current;
+      if (newMeasures[currentIndex] !== undefined) {
+        newMeasures[currentIndex] = {
+          ...newMeasures[currentIndex],
+          noteValue,
+        };
+      }
+      return newMeasures;
+    });
+  };
+
+  /**
+   * 現在の小節の付点音符フラグを更新
+   * @param isDotted 付点音符フラグ
+   */
+  const updateCurrentMeasureDotted = (isDotted: boolean) => {
+    setMeasures(prevMeasures => {
+      const newMeasures = [...prevMeasures];
+      const currentIndex = currentMeasureIndexRef.current;
+      if (newMeasures[currentIndex] !== undefined) {
+        newMeasures[currentIndex] = {
+          ...newMeasures[currentIndex],
+          isDotted,
+        };
+      }
+      return newMeasures;
+    });
+  };
+
+  /**
+   * 現在の小節の三連符フラグを更新
+   * @param isTriplet 三連符フラグ
+   */
+  const updateCurrentMeasureTriplet = (isTriplet: boolean) => {
+    setMeasures(prevMeasures => {
+      const newMeasures = [...prevMeasures];
+      const currentIndex = currentMeasureIndexRef.current;
+      if (newMeasures[currentIndex] !== undefined) {
+        newMeasures[currentIndex] = {
+          ...newMeasures[currentIndex],
+          isTriplet,
+        };
+      }
+      return newMeasures;
+    });
   };
 
   /**
@@ -64,7 +139,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
    */
   const saveCurrentMeasureAndCreateNew = () => {
     const newMeasures = [...measures];
-    newMeasures.push([]); // 新規小節（空の配列）を追加
+    newMeasures.push({ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }); // 新規小節（空の配列とデフォルト音価）を追加
     setMeasures(newMeasures);
     isLoadingMeasureRef.current = true;
     setCurrentMeasureIndex(newMeasures.length - 1); // 新規小節に移動
@@ -143,6 +218,9 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
         deleteCurrentMeasure,
         navigateToMeasure,
         updateCurrentMeasure,
+        updateCurrentMeasureNoteValue,
+        updateCurrentMeasureDotted,
+        updateCurrentMeasureTriplet,
       }}
     >
       {children}
