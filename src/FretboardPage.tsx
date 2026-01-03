@@ -1,10 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGuitarNotes } from "./contexts/GuitarNotesContext";
 import { useTuning } from "./contexts/TuningContext";
 import { useMeasure } from "./contexts/MeasureContext";
 import { MeasureBar } from "./components/MeasureBar";
+import MeasurePlaybackModal from "./components/MeasurePlaybackModal";
 import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
 import { calculateFretHeights } from "./utils/fretboard";
 
@@ -42,6 +43,7 @@ const getFretColor = (fret: number): string => {
 };
 
 function FretboardPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { tuning } = useTuning();
   // MeasureContextから小節情報を取得（SheetPageと共有）
@@ -62,7 +64,7 @@ function FretboardPage() {
    */
   useEffect(() => {
     if (measures[currentMeasureIndex] !== undefined) {
-      setInputtedNoteNumbers([...measures[currentMeasureIndex]]);
+      setInputtedNoteNumbers([...measures[currentMeasureIndex].notes]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentMeasureIndex, measures.length]);
@@ -135,7 +137,13 @@ function FretboardPage() {
         onAddMeasure={saveCurrentMeasureAndCreateNew}
         onDeleteMeasure={deleteCurrentMeasure}
         onNavigateMeasure={navigateToMeasure}
+        onOpenModal={() => setIsModalOpen(true)}
       />
+      {isModalOpen && (
+        <MeasurePlaybackModal
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
       <div
         css={css`
           display: flex;

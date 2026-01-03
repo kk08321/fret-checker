@@ -5,11 +5,12 @@ import ControlPanel from "./components/ControlPanel";
 import { MeasureBar } from "./components/MeasureBar";
 import { useSheetPage } from "./hooks/useSheetPage";
 import { useKeySignature } from "./contexts/KeySignatureContext";
-import { useAudioSettings } from "./contexts/AudioSettingsContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "./utils/keySignature";
 import { calculateNoteOffset } from "./utils/noteUtils";
 import { ModeBadge } from "./components/ModeBadge";
 import { playChord } from "./utils/audio";
+import { useState } from "react";
+import MeasurePlaybackModal from "./components/MeasurePlaybackModal";
 import {
   sheetWrapper,
   whiteBarWrapperCss,
@@ -20,6 +21,7 @@ import {
 } from "./styles/sheetPageStyles";
 
 function SheetPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const {
     touchCoordinates,
     setTouchCoordinates,
@@ -47,9 +49,6 @@ function SheetPage() {
   } = useSheetPage();
   
   const { selectedKeySignature } = useKeySignature();
-  const { audioPlayback } = useAudioSettings();
-  
-  const isAudioEnabled = audioPlayback === "enabled";
 
   const handleClearSelection = () => {
     setSelectedNote(null);
@@ -129,9 +128,21 @@ function SheetPage() {
         position: relative;
         background-color: #FCFCFC;
       `}
-      onTouchStart={setCoordinatesByTouchEvent}
-      onTouchMove={setCoordinatesByTouchEvent}
-      onTouchEnd={onEnter}
+      onTouchStart={(e) => {
+        if (!isModalOpen) {
+          setCoordinatesByTouchEvent(e);
+        }
+      }}
+      onTouchMove={(e) => {
+        if (!isModalOpen) {
+          setCoordinatesByTouchEvent(e);
+        }
+      }}
+      onTouchEnd={() => {
+        if (!isModalOpen) {
+          onEnter();
+        }
+      }}
     >
       <MeasureBar
         currentMeasureIndex={currentMeasureIndex}
@@ -139,56 +150,60 @@ function SheetPage() {
         onAddMeasure={saveCurrentMeasureAndCreateNew}
         onDeleteMeasure={deleteCurrentMeasure}
         onNavigateMeasure={navigateToMeasure}
+        onOpenModal={() => setIsModalOpen(true)}
       />
-      {/* 再生ボタン */}
-      {isAudioEnabled && (
-        <button
-          onClick={handlePlay}
-          onTouchStart={handlePlayTouchStart}
-          onTouchEnd={handlePlayTouchEnd}
-          disabled={inputtedNoteNumbers.length === 0}
-          css={css`
-            position: absolute;
-            top: 55px;
-            left: 10px;
-            z-index: 200;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            background: rgba(0, 0, 0, 0.05);
-            color: rgba(0, 0, 0, 0.6);
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s;
-            box-sizing: border-box;
-            
-            &:hover:not(:disabled) {
-              background: rgba(0, 0, 0, 0.08);
-              border-color: rgba(0, 0, 0, 0.2);
-              color: rgba(0, 0, 0, 0.7);
-            }
-            
-            &:active:not(:disabled) {
-              transform: scale(0.95);
-              background: rgba(0, 0, 0, 0.1);
-            }
-            
-            &:disabled {
-              background: rgba(0, 0, 0, 0.03);
-              cursor: not-allowed;
-              opacity: 0.4;
-            }
-          `}
-          title="再生"
-        >
-          ▶
-        </button>
+      {isModalOpen && (
+        <MeasurePlaybackModal
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
+      {/* 再生ボタン */}
+      <button
+        onClick={handlePlay}
+        onTouchStart={handlePlayTouchStart}
+        onTouchEnd={handlePlayTouchEnd}
+        disabled={inputtedNoteNumbers.length === 0}
+        css={css`
+          position: absolute;
+          top: 55px;
+          left: 10px;
+          z-index: 200;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          background: rgba(0, 0, 0, 0.05);
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 20px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s;
+          box-sizing: border-box;
+          
+          &:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.2);
+            color: rgba(0, 0, 0, 0.7);
+          }
+          
+          &:active:not(:disabled) {
+            transform: scale(0.95);
+            background: rgba(0, 0, 0, 0.1);
+          }
+          
+          &:disabled {
+            background: rgba(0, 0, 0, 0.03);
+            cursor: not-allowed;
+            opacity: 0.4;
+          }
+        `}
+        title="再生"
+      >
+        ▶
+      </button>
       {isSharpMode && <ModeBadge label="シャープモード" symbol="#" />}
       {isFlatMode && <ModeBadge label="フラットモード" symbol="♭" />}
       {isNaturalMode && <ModeBadge label="ナチュラルモード" symbol="♮" />}
