@@ -46,7 +46,7 @@ function FretboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { inputtedNoteNumbers, setInputtedNoteNumbers } = useGuitarNotes();
   const { tuning } = useTuning();
-  // MeasureContextから小節情報を取得（SheetPageと共有）
+  // MeasureContextからページ情報を取得（SheetPageと共有）
   const {
     measures,
     currentMeasureIndex,
@@ -56,9 +56,9 @@ function FretboardPage() {
   } = useMeasure();
 
   /**
-   * currentMeasureIndexまたはmeasures.lengthが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
-   * FretboardPageで小節を切り替えた際に、その小節の音符を表示するために呼ばれる
-   * SheetPageとFretboardPageで同じ小節情報を共有するため、どちらのページで小節を切り替えても
+   * currentMeasureIndexまたはmeasures.lengthが変更されたときに、対応するページの内容をinputtedNoteNumbersに設定
+   * FretboardPageでページを切り替えた際に、そのページの音符を表示するために呼ばれる
+   * SheetPageとFretboardPageで同じページ情報を共有するため、どちらのページでページを切り替えても
    * もう一方のページでも反映される
    * measures.lengthを依存配列に含めることで、削除時にcurrentMeasureIndexが変更されない場合でも検知できる
    */

@@ -206,16 +206,16 @@ export const useSheetPage = () => {
     setTouchCoordinates({ x: 0, y: -100 });
   };
 
-  // inputtedNoteNumbersを小節から読み込んでいる最中かどうかを示すフラグ
-  // このフラグにより、小節読み込み時にupdateCurrentMeasureが呼ばれるのを防ぐ（無限ループ防止）
+  // inputtedNoteNumbersをページから読み込んでいる最中かどうかを示すフラグ
+  // このフラグにより、ページ読み込み時にupdateCurrentMeasureが呼ばれるのを防ぐ（無限ループ防止）
   const isUpdatingFromMeasureRef = useRef(false);
 
   /**
-   * inputtedNoteNumbersが変更されたときに、現在の小節に保存する
-   * ユーザーが音符を入力した際に、その内容を現在の小節に反映する
+   * inputtedNoteNumbersが変更されたときに、現在のページに保存する
+   * ユーザーが音符を入力した際に、その内容を現在のページに反映する
    */
   useEffect(() => {
-    // 小節から読み込んでいる最中でない場合のみ更新
+    // ページから読み込んでいる最中でない場合のみ更新
     if (!isUpdatingFromMeasureRef.current) {
       updateCurrentMeasure(inputtedNoteNumbers);
     }
@@ -223,8 +223,8 @@ export const useSheetPage = () => {
   }, [inputtedNoteNumbers]);
 
   /**
-   * currentMeasureIndexまたはmeasures.lengthが変更されたときに、対応する小節の内容をinputtedNoteNumbersに設定
-   * 小節を切り替えた際に、その小節の音符を表示するために呼ばれる
+   * currentMeasureIndexまたはmeasures.lengthが変更されたときに、対応するページの内容をinputtedNoteNumbersに設定
+   * ページを切り替えた際に、そのページの音符を表示するために呼ばれる
    * measures.lengthを依存配列に含めることで、削除時にcurrentMeasureIndexが変更されない場合でも検知できる
    */
   useEffect(() => {
@@ -237,37 +237,37 @@ export const useSheetPage = () => {
   }, [currentMeasureIndex, measures.length]);
 
   /**
-   * 現在の小節を保存して新規小節を作成
-   * 現在の入力内容を保存してから、新しい空の小節を作成する
+   * 現在のページを保存して新規ページを作成
+   * 現在の入力内容を保存してから、新しい空のページを作成する
    */
   const handleSaveCurrentMeasureAndCreateNew = () => {
-    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
-    saveCurrentMeasureAndCreateNew(); // 新規小節を作成して移動
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力をページに保存
+    saveCurrentMeasureAndCreateNew(); // 新規ページを作成して移動
     // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
-    // 新規小節は空なので、useEffectで空の配列がinputtedNoteNumbersに設定される
+    // 新規ページは空なので、useEffectで空の配列がinputtedNoteNumbersに設定される
   };
 
   /**
-   * 現在の小節を削除
-   * 現在の入力内容を保存してから、小節を削除する
+   * 現在のページを削除
+   * 現在の入力内容を保存してから、ページを削除する
    */
   const handleDeleteCurrentMeasure = () => {
-    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
-    deleteCurrentMeasure(); // 小節を削除
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力をページに保存
+    deleteCurrentMeasure(); // ページを削除
     // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
-    // 削除後の小節の内容がinputtedNoteNumbersに設定される
+    // 削除後のページの内容がinputtedNoteNumbersに設定される
   };
 
   /**
-   * 前後の小節に移動
-   * 現在の入力内容を保存してから、指定方向の小節に移動する
+   * 前後のページに移動
+   * 現在の入力内容を保存してから、指定方向のページに移動する
    * @param direction 移動方向（'prev' または 'next'）
    */
   const handleNavigateToMeasure = (direction: 'prev' | 'next') => {
-    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力を小節に保存
-    navigateToMeasure(direction); // 小節を移動
+    updateCurrentMeasure(inputtedNoteNumbers); // 現在の入力をページに保存
+    navigateToMeasure(direction); // ページを移動
     // currentMeasureIndexが変更されるので、上記のuseEffectが実行される
-    // 移動先の小節の内容がinputtedNoteNumbersに設定される
+    // 移動先のページの内容がinputtedNoteNumbersに設定される
   };
 
   // D&D操作の開始位置を記録するコールバック
@@ -295,7 +295,7 @@ export const useSheetPage = () => {
     isNaturalMode,
     setIsNaturalMode,
     recordDragStart,
-    // 小節管理関連
+    // ページ管理関連
     measures,
     currentMeasureIndex,
     saveCurrentMeasureAndCreateNew: handleSaveCurrentMeasureAndCreateNew,

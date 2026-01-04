@@ -17,7 +17,7 @@ function App() {
       <KeySignatureProvider>
         <TuningProvider>
           <AudioSettingsProvider>
-            {/* MeasureProvider: SheetPageとFretboardPage間で小節情報を共有するためのProvider */}
+            {/* MeasureProvider: SheetPageとFretboardPage間でページ情報を共有するためのProvider */}
             <MeasureProvider>
             <BrowserRouter>
             <div

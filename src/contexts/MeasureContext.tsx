@@ -6,44 +6,44 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode } fro
 export type NoteValue = 'whole' | 'half' | 'quarter' | 'eighth' | 'sixteenth';
 
 /**
- * 小節情報の型定義
+ * ページ情報の型定義
  */
 export interface MeasureData {
   notes: string[]; // 音符の配列
-  noteValue: NoteValue; // 小節の音価（デフォルトは'quarter'）
+  noteValue: NoteValue; // ページの音価（デフォルトは'quarter'）
   isDotted?: boolean; // 付点音符フラグ（音価×1.5）
   isTriplet?: boolean; // 三連符フラグ
 }
 
 /**
  * MeasureContextの型定義
- * 小節情報の管理と操作に関する関数を提供
+ * ページ情報の管理と操作に関する関数を提供
  */
 interface MeasureContextType {
-  measures: MeasureData[]; // 全小節の配列
-  currentMeasureIndex: number; // 現在編集中の小節のインデックス
+  measures: MeasureData[]; // 全ページの配列
+  currentMeasureIndex: number; // 現在編集中のページのインデックス
   setCurrentMeasureIndex: (index: number) => void;
-  saveCurrentMeasureAndCreateNew: () => void; // 現在の小節を保存して新規小節を作成
-  deleteCurrentMeasure: () => void; // 現在の小節を削除
-  navigateToMeasure: (direction: 'prev' | 'next') => void; // 前後の小節に移動
-  updateCurrentMeasure: (notes: string[]) => void; // 現在の小節の内容を更新
-  updateCurrentMeasureNoteValue: (noteValue: NoteValue) => void; // 現在の小節の音価を更新
-  updateCurrentMeasureDotted: (isDotted: boolean) => void; // 現在の小節の付点音符フラグを更新
-  updateCurrentMeasureTriplet: (isTriplet: boolean) => void; // 現在の小節の三連符フラグを更新
+  saveCurrentMeasureAndCreateNew: () => void; // 現在のページを保存して新規ページを作成
+  deleteCurrentMeasure: () => void; // 現在のページを削除
+  navigateToMeasure: (direction: 'prev' | 'next') => void; // 前後のページに移動
+  updateCurrentMeasure: (notes: string[]) => void; // 現在のページの内容を更新
+  updateCurrentMeasureNoteValue: (noteValue: NoteValue) => void; // 現在のページの音価を更新
+  updateCurrentMeasureDotted: (isDotted: boolean) => void; // 現在のページの付点音符フラグを更新
+  updateCurrentMeasureTriplet: (isTriplet: boolean) => void; // 現在のページの三連符フラグを更新
 }
 
 const MeasureContext = createContext<MeasureContextType | undefined>(undefined);
 
 /**
  * MeasureProviderコンポーネント
- * 小節情報をContextで管理し、SheetPageとFretboardPage間で共有する
+ * ページ情報をContextで管理し、SheetPageとFretboardPage間で共有する
  */
 export const MeasureProvider = ({ children }: { children: ReactNode }) => {
-  // 全小節の配列（各小節は音符の配列と音価を含む）
+  // 全ページの配列（各ページは音符の配列と音価を含む）
   const [measures, setMeasures] = useState<MeasureData[]>([{ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }]);
-  // 現在編集中の小節のインデックス
+  // 現在編集中のページのインデックス
   const [currentMeasureIndex, setCurrentMeasureIndex] = useState(0);
-  // 小節読み込み中フラグ（無限ループを防ぐため）
+  // ページ読み込み中フラグ（無限ループを防ぐため）
   const isLoadingMeasureRef = useRef(false);
   // currentMeasureIndexの最新値を保持するref（updateCurrentMeasureで使用）
   const currentMeasureIndexRef = useRef(0);
@@ -58,12 +58,12 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   }, [currentMeasureIndex]);
 
   /**
-   * 現在の小節の内容を更新
+   * 現在のページの内容を更新
    * 外部（useSheetPage等）から呼び出される
    * @param notes 更新する音符の配列
    */
   const updateCurrentMeasure = (notes: string[]) => {
-    // 小節読み込み中の場合は更新をスキップ（無限ループを防ぐ）
+    // ページ読み込み中の場合は更新をスキップ（無限ループを防ぐ）
     if (!isLoadingMeasureRef.current) {
       setMeasures(prevMeasures => {
         const newMeasures = [...prevMeasures];
@@ -80,7 +80,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * 現在の小節の音価を更新
+   * 現在のページの音価を更新
    * @param noteValue 更新する音価
    */
   const updateCurrentMeasureNoteValue = (noteValue: NoteValue) => {
@@ -98,7 +98,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * 現在の小節の付点音符フラグを更新
+   * 現在のページの付点音符フラグを更新
    * @param isDotted 付点音符フラグ
    */
   const updateCurrentMeasureDotted = (isDotted: boolean) => {
@@ -116,7 +116,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * 現在の小節の三連符フラグを更新
+   * 現在のページの三連符フラグを更新
    * @param isTriplet 三連符フラグ
    */
   const updateCurrentMeasureTriplet = (isTriplet: boolean) => {
@@ -134,22 +134,22 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * 現在の小節を保存して新規小節を作成
-   * 空の小節を配列の末尾に追加し、その小節に移動する
+   * 現在のページを保存して新規ページを作成
+   * 空のページを配列の末尾に追加し、そのページに移動する
    */
   const saveCurrentMeasureAndCreateNew = () => {
     const newMeasures = [...measures];
-    newMeasures.push({ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }); // 新規小節（空の配列とデフォルト音価）を追加
+    newMeasures.push({ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }); // 新規ページ（空の配列とデフォルト音価）を追加
     setMeasures(newMeasures);
     isLoadingMeasureRef.current = true;
-    setCurrentMeasureIndex(newMeasures.length - 1); // 新規小節に移動
+    setCurrentMeasureIndex(newMeasures.length - 1); // 新規ページに移動
     // useEffectでisLoadingMeasureRef.currentがfalseに戻される
   };
 
   /**
-   * 現在の小節を削除
-   * 小節が1つだけの場合は削除しない（空の小節を1つ残す）
-   * 削除後は適切な小節に移動する
+   * 現在のページを削除
+   * ページが1つだけの場合は削除しない（空のページを1つ残す）
+   * 削除後は適切なページに移動する
    */
   const deleteCurrentMeasure = () => {
     isLoadingMeasureRef.current = true;
@@ -157,27 +157,27 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
     
     // 関数型更新を使用して最新のmeasuresを確実に参照
     setMeasures(prevMeasures => {
-      // 小節が1つだけの場合は削除しない（空の小節を1つ残す）
+      // ページが1つだけの場合は削除しない（空のページを1つ残す）
       if (prevMeasures.length <= 1) {
         isLoadingMeasureRef.current = false;
         return prevMeasures;
       }
 
       const newMeasures = [...prevMeasures];
-      newMeasures.splice(currentIndex, 1); // 現在の小節を削除
+      newMeasures.splice(currentIndex, 1); // 現在のページを削除
       
       // 削除後のインデックスを決定
       let newIndex: number;
       if (currentIndex === prevMeasures.length - 1) {
-        // 最後の小節を削除した場合は、新しい最後の小節に移動
+        // 最後のページを削除した場合は、新しい最後のページに移動
         newIndex = newMeasures.length - 1;
       } else if (currentIndex === 0) {
-        // 最初の小節を削除した場合は、削除後もインデックス0に移動
-        // （元の2小節目が新しい1小節目になる）
+        // 最初のページを削除した場合は、削除後もインデックス0に移動
+        // （元の2ページ目が新しい1ページ目になる）
         newIndex = 0;
       } else {
-        // 中間の小節を削除した場合は、同じインデックスに移動
-        // （削除により、そのインデックスの内容は次の小節の内容になる）
+        // 中間のページを削除した場合は、同じインデックスに移動
+        // （削除により、そのインデックスの内容は次のページの内容になる）
         newIndex = currentIndex;
       }
       
@@ -190,8 +190,8 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * 前後の小節に移動
-   * 現在の小節の内容を更新する必要がある場合は、呼び出し側（useSheetPage等）で処理
+   * 前後のページに移動
+   * 現在のページの内容を更新する必要がある場合は、呼び出し側（useSheetPage等）で処理
    * @param direction 移動方向（'prev' または 'next'）
    */
   const navigateToMeasure = (direction: 'prev' | 'next') => {

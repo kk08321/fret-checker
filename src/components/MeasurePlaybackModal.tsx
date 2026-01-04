@@ -34,11 +34,11 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
   const [bpm, setBpm] = useState(120);
   
   // Canvasの幅を計算するための定数
-  const baseMeasureWidth = 100; // 基準となる小節幅
+  const baseMeasureWidth = 100; // 基準となるページ幅
   const leftMargin = 10; // ト音記号がないので左マージンを縮小
   const rightMargin = 20;
 
-  // 音価に応じた小節間の間隔を計算する関数
+  // 音価に応じたページ間の間隔を計算する関数
   const getMeasureSpacing = (noteValue: NoteValue): number => {
     switch (noteValue) {
       case 'whole':
@@ -56,7 +56,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     }
   };
 
-  // 指定された小節のX位置を計算する関数
+  // 指定されたページのX位置を計算する関数
   const getMeasureXPosition = (measureIndex: number): number => {
     let x = leftMargin;
     for (let i = 0; i < measureIndex; i++) {
@@ -67,14 +67,14 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         x += getMeasureSpacing(prevNoteValue);
       }
     }
-    // 現在の小節の中央位置を返す
+    // 現在のページの中央位置を返す
     const currentMeasureWidth = measureIndex === 0 
       ? baseMeasureWidth 
       : getMeasureSpacing(measures[measureIndex - 1].noteValue);
     return x + currentMeasureWidth / 2;
   };
 
-  // 選択中の小節が変更されたら、モーダル内の選択も更新
+  // 選択中のページが変更されたら、モーダル内の選択も更新
   useEffect(() => {
     setSelectedMeasureIndex(currentMeasureIndex);
   }, [currentMeasureIndex]);
@@ -105,7 +105,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     };
   }, []);
 
-  // 小節切り替え
+  // ページ切り替え
   const handleFirstMeasure = () => {
     if (selectedMeasureIndex > 0) {
       setSelectedMeasureIndex(0);
@@ -239,7 +239,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       playMetronomeClick();
     }, quarterNoteDuration * 1000);
     
-    // 最初の小節を再生
+    // 最初のページを再生
     playMeasure(0);
   };
 
@@ -257,10 +257,10 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     }
   };
 
-  // 指定された小節を再生し、次の小節への再生をスケジュール
+  // 指定されたページを再生し、次のページへの再生をスケジュール
   const playMeasure = (measureIndex: number) => {
     if (measureIndex >= measures.length) {
-      // すべての小節を再生完了
+      // すべてのページを再生完了
       handleStop();
       return;
     }
@@ -271,10 +271,10 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       const duration = getNoteValueDuration(measure.noteValue, measure.isDotted || false, measure.isTriplet || false);
       playChord(measure.notes, duration);
     }
-    // 音符がない場合は、その小節の音価に応じた長さで無音をキープ（休符として処理）
+    // 音符がない場合は、そのページの音価に応じた長さで無音をキープ（休符として処理）
 
-    // 次の小節への再生をスケジュール
-    // 音符がない場合でも、その小節の音価（全音符、二分音符など）に応じた長さで無音をキープ
+    // 次のページへの再生をスケジュール
+    // 音符がない場合でも、そのページの音価（全音符、二分音符など）に応じた長さで無音をキープ
     const duration = getNoteValueDuration(measure.noteValue, measure.isDotted || false, measure.isTriplet || false);
     
     setPlayingMeasureIndex(measureIndex);
@@ -284,7 +284,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     }, duration * 1000);
   };
 
-  // 指定された小節を中央にスクロールする関数
+  // 指定されたページを中央にスクロールする関数
   const scrollToMeasure = (measureIndex: number) => {
     if (!containerRef.current || measureIndex < 0 || measureIndex >= measures.length) return;
 
@@ -298,7 +298,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     // コンテナの幅とスクロール位置を取得
     const containerWidth = container.getBoundingClientRect().width;
     
-    // 小節が中央に来るようにスクロール位置を計算
+    // ページが中央に来るようにスクロール位置を計算
     const scrollLeft = scaledMeasureX - containerWidth / 2;
     
     // スムーズにスクロール
@@ -308,14 +308,14 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     });
   };
 
-  // 再生中の小節が変更されたときに自動スクロール
+  // 再生中のページが変更されたときに自動スクロール
   useEffect(() => {
     if (playingMeasureIndex !== null) {
       scrollToMeasure(playingMeasureIndex);
     }
   }, [playingMeasureIndex, measures, canvasWidth]);
 
-  // 選択中の小節が変更されたときに自動スクロール
+  // 選択中のページが変更されたときに自動スクロール
   useEffect(() => {
     scrollToMeasure(selectedMeasureIndex);
   }, [selectedMeasureIndex, measures, canvasWidth]);
@@ -345,15 +345,15 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     const containerElement = containerRef.current;
     const containerWidth = containerElement ? containerElement.getBoundingClientRect().width : 800;
     const canvasHeight = 200; // 高さを短くして一覧性を向上
-    // Canvasの幅は小節数に応じて計算（最小でもコンテナ幅）
-    // 各小節の間隔を音価に応じて計算
+    // Canvasの幅はページ数に応じて計算（最小でもコンテナ幅）
+    // 各ページの間隔を音価に応じて計算
     let totalWidth = leftMargin;
     measures.forEach((_, index) => {
       if (index === 0) {
-        // 最初の小節は基準幅を使用
+        // 最初のページは基準幅を使用
         totalWidth += baseMeasureWidth;
       } else {
-        // 前の小節の音価に応じた間隔を使用
+        // 前のページの音価に応じた間隔を使用
         const prevNoteValue = measures[index - 1].noteValue;
         totalWidth += getMeasureSpacing(prevNoteValue);
       }
@@ -397,7 +397,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       ctx.stroke();
     }
 
-    // 各小節の音符を描画
+    // 各ページの音符を描画
     let currentX = leftMargin;
     measures.forEach((measure, measureIndex) => {
       const measureNotes = measure.notes;
@@ -405,12 +405,12 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       const isDotted = measure.isDotted || false;
       const isTriplet = measure.isTriplet || false;
 
-      // この小節の幅を決定（最初の小節は基準幅、それ以外は前の小節の音価に応じた間隔）
+      // このページの幅を決定（最初のページは基準幅、それ以外は前のページの音価に応じた間隔）
       const currentMeasureWidth = measureIndex === 0 
         ? baseMeasureWidth 
         : getMeasureSpacing(measures[measureIndex - 1].noteValue);
 
-      // 補助線を描画するために、この小節の音符の位置を取得
+      // 補助線を描画するために、このページの音符の位置を取得
       const ledgerLines = new Set<number>(); // 補助線が必要な線のインデックス
       
       measureNotes.forEach((noteStr) => {
@@ -442,13 +442,13 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         ctx.stroke();
       });
 
-      // 和音として表示するため、同じ小節内のすべての音符を同じX位置に配置
-      const noteX = currentX + currentMeasureWidth / 2; // 小節の中央
+      // 和音として表示するため、同じページ内のすべての音符を同じX位置に配置
+      const noteX = currentX + currentMeasureWidth / 2; // ページの中央
 
-      // 選択中の小節かどうかを判定
+      // 選択中のページかどうかを判定
       const isSelectedMeasure = measureIndex === selectedMeasureIndex;
       
-      // 再生中の小節かどうかを判定
+      // 再生中のページかどうかを判定
       const isPlayingMeasure = measureIndex === playingMeasureIndex;
 
       // 臨時記号を先に描画（重ならないようにするため）
@@ -512,7 +512,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         // 臨時記号を描画
         accidentals.forEach((accidental) => {
           ctx.font = 'bold 28px serif';
-          // 再生中の小節の場合はオレンジ、選択中の小節の場合は水色、それ以外は黒色
+          // 再生中のページの場合はオレンジ、選択中のページの場合は水色、それ以外は黒色
           ctx.fillStyle = isPlayingMeasure ? '#FF9800' : (isSelectedMeasure ? '#00BCD4' : '#000');
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -524,7 +524,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       
       // 音符がない場合は休符を描画
       if (measureNotes.length === 0) {
-        const restX = currentX + currentMeasureWidth / 2; // 小節の中央
+        const restX = currentX + currentMeasureWidth / 2; // ページの中央
         const restY = topMargin + 14 * lineSpacing; // 中央線（第3線、インデックス10）の位置
         
         ctx.fillStyle = restColor;
@@ -588,13 +588,13 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           ctx.fill();
         }
         
-        // 次の小節の位置を更新
+        // 次のページの位置を更新
         currentX += currentMeasureWidth;
         return;
       }
       
       // 和音の場合、縦線は一番上と一番下の音符の間を結ぶ
-      // まず、すべての音符のY位置を取得（小節ごとに一度だけ計算）
+      // まず、すべての音符のY位置を取得（ページごとに一度だけ計算）
       const allNoteYs = measureNotes
         .map(n => {
           const num = parseInt(n.replace('#', '').replace('b', '').replace('n', ''), 10);
@@ -626,7 +626,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         const noteY = topMargin + lineIndex * lineSpacing;
 
         // 音符を描画（音価に応じた形状）
-        // 再生中の小節の場合はオレンジ、選択中の小節の場合は水色、それ以外は黒色
+        // 再生中のページの場合はオレンジ、選択中のページの場合は水色、それ以外は黒色
         const noteColor = isPlayingMeasure ? '#FF9800' : (isSelectedMeasure ? '#00BCD4' : '#000');
         ctx.fillStyle = noteColor;
         ctx.strokeStyle = noteColor;
@@ -654,7 +654,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
 
         // 縦線は最初の音符の描画時に一度だけ描画（和音の場合は共有）
         if (noteIndex === 0 && noteValue !== 'whole') {
-          // 縦線の色も選択中の小節の場合は水色に
+          // 縦線の色も選択中のページの場合は水色に
           ctx.strokeStyle = noteColor;
           ctx.beginPath();
           ctx.moveTo(stemStartX, stemDirection === 'down' ? minNoteY : maxNoteY);
@@ -729,7 +729,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         }
       });
 
-      // 次の小節の位置を更新（この小節の幅分進む）
+      // 次のページの位置を更新（このページの幅分進む）
       currentX += currentMeasureWidth;
     });
 
@@ -838,7 +838,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           </button>
         </div>
 
-        {/* 小節切り替えと音価指定 */}
+        {/* ページ切り替えと音価指定 */}
         <div
           css={css`
             display: flex;
@@ -850,13 +850,15 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
             border-radius: 8px;
           `}
         >
-          {/* ページネーション */}
+          {/* ページネーション - 白い横長ブロックにグルーピング */}
           <div
             css={css`
               display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 16px;
+              align-items: stretch;
+              background-color: #fff;
+              border-radius: 8px;
+              border: 1px solid #e0e0e0;
+              overflow: hidden;
             `}
           >
             {/* 最初へボタン */}
@@ -864,13 +866,13 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               onClick={handleFirstMeasure}
               disabled={selectedMeasureIndex === 0}
               css={css`
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
-                border: 1px solid ${selectedMeasureIndex === 0 ? '#ddd' : '#bbb'};
-                background-color: ${selectedMeasureIndex === 0 ? '#f0f0f0' : '#fff'};
-                color: ${selectedMeasureIndex === 0 ? '#bbb' : '#333'};
-                font-size: 20px;
+                flex: 0 0 auto;
+                padding: 8px 16px;
+                border: none;
+                border-right: 1px solid #e0e0e0;
+                background-color: transparent;
+                color: ${selectedMeasureIndex === 0 ? '#bbb' : '#666'};
+                font-size: 16px;
                 cursor: ${selectedMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
                 display: flex;
                 align-items: center;
@@ -879,11 +881,10 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 
                 &:hover:not(:disabled) {
                   background-color: #f5f5f5;
-                  border-color: #999;
                 }
                 
                 &:active:not(:disabled) {
-                  transform: scale(0.95);
+                  background-color: #eeeeee;
                 }
               `}
             >
@@ -895,13 +896,13 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               onClick={handlePrevMeasure}
               disabled={selectedMeasureIndex === 0}
               css={css`
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
-                border: 1px solid ${selectedMeasureIndex === 0 ? '#ddd' : '#bbb'};
-                background-color: ${selectedMeasureIndex === 0 ? '#f0f0f0' : '#fff'};
-                color: ${selectedMeasureIndex === 0 ? '#bbb' : '#333'};
-                font-size: 20px;
+                flex: 0 0 auto;
+                padding: 8px 16px;
+                border: none;
+                border-right: 1px solid #e0e0e0;
+                background-color: transparent;
+                color: ${selectedMeasureIndex === 0 ? '#bbb' : '#666'};
+                font-size: 16px;
                 cursor: ${selectedMeasureIndex === 0 ? 'not-allowed' : 'pointer'};
                 display: flex;
                 align-items: center;
@@ -910,28 +911,45 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 
                 &:hover:not(:disabled) {
                   background-color: #f5f5f5;
-                  border-color: #999;
                 }
                 
                 &:active:not(:disabled) {
-                  transform: scale(0.95);
+                  background-color: #eeeeee;
                 }
               `}
             >
               &lt;
             </button>
 
-            {/* 小節数表示 */}
+            {/* ページ数表示 */}
             <div
               css={css`
-                color: #333;
-                font-size: 16px;
-                font-weight: bold;
-                min-width: 60px;
-                text-align: center;
+                flex: 1;
+                display: flex;
+                align-items: baseline;
+                justify-content: center;
+                gap: 2px;
+                padding: 8px 12px;
+                border-right: 1px solid #e0e0e0;
               `}
             >
-              {selectedMeasureIndex + 1}/{measures.length}
+              <span
+                css={css`
+                  color: #333;
+                  font-size: 18px;
+                  font-weight: bold;
+                `}
+              >
+                {selectedMeasureIndex + 1}/{measures.length}
+              </span>
+              <span
+                css={css`
+                  color: #999;
+                  font-size: 10px;
+                  font-weight: normal;
+                `}
+              >
+              </span>
             </div>
 
             {/* 次へボタン */}
@@ -939,13 +957,13 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               onClick={handleNextMeasure}
               disabled={selectedMeasureIndex >= measures.length - 1}
               css={css`
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
-                border: 1px solid ${selectedMeasureIndex >= measures.length - 1 ? '#ddd' : '#bbb'};
-                background-color: ${selectedMeasureIndex >= measures.length - 1 ? '#f0f0f0' : '#fff'};
-                color: ${selectedMeasureIndex >= measures.length - 1 ? '#bbb' : '#333'};
-                font-size: 20px;
+                flex: 0 0 auto;
+                padding: 8px 16px;
+                border: none;
+                border-right: 1px solid #e0e0e0;
+                background-color: transparent;
+                color: ${selectedMeasureIndex >= measures.length - 1 ? '#bbb' : '#666'};
+                font-size: 16px;
                 cursor: ${selectedMeasureIndex >= measures.length - 1 ? 'not-allowed' : 'pointer'};
                 display: flex;
                 align-items: center;
@@ -954,11 +972,10 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 
                 &:hover:not(:disabled) {
                   background-color: #f5f5f5;
-                  border-color: #999;
                 }
                 
                 &:active:not(:disabled) {
-                  transform: scale(0.95);
+                  background-color: #eeeeee;
                 }
               `}
             >
@@ -970,13 +987,12 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               onClick={handleLastMeasure}
               disabled={selectedMeasureIndex >= measures.length - 1}
               css={css`
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
-                border: 1px solid ${selectedMeasureIndex >= measures.length - 1 ? '#ddd' : '#bbb'};
-                background-color: ${selectedMeasureIndex >= measures.length - 1 ? '#f0f0f0' : '#fff'};
-                color: ${selectedMeasureIndex >= measures.length - 1 ? '#bbb' : '#333'};
-                font-size: 20px;
+                flex: 0 0 auto;
+                padding: 8px 16px;
+                border: none;
+                background-color: transparent;
+                color: ${selectedMeasureIndex >= measures.length - 1 ? '#bbb' : '#666'};
+                font-size: 16px;
                 cursor: ${selectedMeasureIndex >= measures.length - 1 ? 'not-allowed' : 'pointer'};
                 display: flex;
                 align-items: center;
@@ -985,11 +1001,10 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 
                 &:hover:not(:disabled) {
                   background-color: #f5f5f5;
-                  border-color: #999;
                 }
                 
                 &:active:not(:disabled) {
-                  transform: scale(0.95);
+                  background-color: #eeeeee;
                 }
               `}
             >
@@ -1001,19 +1016,12 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           <div
             css={css`
               display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 12px;
+              background-color: rgba(120, 120, 128, 0.16);
+              border-radius: 8.91px;
+              padding: 2.5px;
+              gap: 0;
             `}
           >
-            <span
-              css={css`
-                font-size: 14px;
-                color: #666;
-              `}
-            >
-              音価:
-            </span>
             {(['whole', 'half', 'quarter', 'eighth', 'sixteenth'] as NoteValue[]).map((value) => {
               const isSelected = currentNoteValue === value;
               let svgPath = '';
@@ -1039,27 +1047,22 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               return (
                 <button
                   key={value}
+                  type="button"
                   onClick={() => handleNoteValueChange(value)}
                   css={css`
-                    padding: 8px;
-                    border-radius: 8px;
-                    border: 2px solid ${isSelected ? '#4CAF50' : '#ddd'};
-                    background-color: ${isSelected ? '#E8F5E9' : '#fff'};
+                    flex: 1;
+                    padding: 7px 8px;
+                    border: none;
+                    border-radius: 6.67px;
                     cursor: pointer;
-                    transition: all 0.2s;
+                    transition: all 0.2s ease;
+                    background-color: ${isSelected ? '#ffffff' : 'transparent'};
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    width: 48px;
-                    height: 48px;
-                    
-                    &:hover {
-                      background-color: ${isSelected ? '#C8E6C9' : '#f5f5f5'};
-                      border-color: ${isSelected ? '#4CAF50' : '#bbb'};
-                    }
                     
                     &:active {
-                      transform: scale(0.95);
+                      transform: scale(0.98);
                     }
                   `}
                 >
@@ -1068,7 +1071,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                     css={css`
                       width: 32px;
                       height: 40px;
-                      fill: ${isSelected ? '#2E7D32' : '#333'};
+                      fill: ${isSelected ? '#007aff' : 'rgba(60, 60, 67, 0.6)'};
                       stroke: none;
                     `}
                   >
@@ -1230,22 +1233,50 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           </div>
         </div>
 
-        {/* BPM入力と再生ボタン */}
+        {/* Canvasで楽譜を表示 */}
+        <div
+          ref={containerRef}
+          data-scroll-container
+          css={css`
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #FCFCFC;
+            touch-action: pan-x pan-y;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+          `}
+        >
+          <canvas
+            ref={canvasRef}
+            css={css`
+              height: 200px;
+              display: block;
+              pointer-events: none;
+              touch-action: none;
+            `}
+            style={{
+              width: canvasWidth > 0 ? `${canvasWidth}px` : '100%',
+            }}
+          />
+        </div>
+
+        {/* BPM入力 */}
         <div
           css={css`
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
           `}
         >
-          {/* BPM入力 */}
           <div
             css={css`
               display: flex;
               align-items: center;
-              gap: 8px;
+              justify-content: center;
+              gap: 2px;
             `}
           >
             <label
@@ -1259,29 +1290,28 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
             </label>
             <input
               type="number"
-              min="30"
-              max="300"
+              min="40"
+              max="220"
               value={bpm}
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value >= 30 && value <= 300) {
+                if (!isNaN(value) && value >= 40 && value <= 220) {
                   setBpm(value);
                 }
               }}
               disabled={isPlaying}
               css={css`
-                width: 80px;
-                padding: 8px 12px;
-                border: 1px solid #ddd;
+                width: 50px;
+                padding: 6px 0;
+                border: none;
                 border-radius: 6px;
-                font-size: 14px;
+                font-size: 16px;
                 text-align: center;
                 background-color: ${isPlaying ? '#f5f5f5' : '#fff'};
                 color: ${isPlaying ? '#999' : '#333'};
                 
                 &:focus {
                   outline: none;
-                  border-color: #4CAF50;
                   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
                 }
                 
@@ -1290,9 +1320,70 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 }
               `}
             />
+            <input
+              type="range"
+              min="40"
+              max="220"
+              value={bpm}
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                if (!isNaN(value) && value >= 40 && value <= 220) {
+                  setBpm(value);
+                }
+              }}
+              disabled={isPlaying}
+              css={css`
+                flex: 1;
+                max-width: 300px;
+                height: 6px;
+                border-radius: 3px;
+                background: ${isPlaying ? '#e0e0e0' : '#ddd'};
+                outline: none;
+                cursor: ${isPlaying ? 'not-allowed' : 'pointer'};
+                
+                &::-webkit-slider-thumb {
+                  appearance: none;
+                  width: 18px;
+                  height: 18px;
+                  border-radius: 50%;
+                  background: ${isPlaying ? '#999' : '#4CAF50'};
+                  cursor: ${isPlaying ? 'not-allowed' : 'pointer'};
+                  transition: all 0.2s;
+                  
+                  &:hover {
+                    background: ${isPlaying ? '#999' : '#45a049'};
+                    transform: scale(1.1);
+                  }
+                }
+                
+                &::-moz-range-thumb {
+                  width: 18px;
+                  height: 18px;
+                  border-radius: 50%;
+                  background: ${isPlaying ? '#999' : '#4CAF50'};
+                  cursor: ${isPlaying ? 'not-allowed' : 'pointer'};
+                  border: none;
+                  transition: all 0.2s;
+                  
+                  &:hover {
+                    background: ${isPlaying ? '#999' : '#45a049'};
+                    transform: scale(1.1);
+                  }
+                }
+              `}
+            />
           </div>
+        </div>
 
-          {/* 再生ボタン */}
+        {/* 再生ボタン */}
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+          `}
+        >
           <button
             onClick={handlePlay}
             css={css`
@@ -1348,35 +1439,6 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               </>
             )}
           </button>
-        </div>
-
-        {/* Canvasで楽譜を表示 */}
-        <div
-          ref={containerRef}
-          data-scroll-container
-          css={css`
-            flex: 1;
-            overflow: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #FCFCFC;
-            touch-action: pan-x pan-y;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-          `}
-        >
-          <canvas
-            ref={canvasRef}
-            css={css`
-              height: 200px;
-              display: block;
-              pointer-events: none;
-              touch-action: none;
-            `}
-            style={{
-              width: canvasWidth > 0 ? `${canvasWidth}px` : '100%',
-            }}
-          />
         </div>
       </div>
     </div>

@@ -43,7 +43,7 @@ export const MeasureBar = ({
     if (totalMeasures <= 1) {
       return;
     }
-    if (window.confirm('この小節を削除してもよろしいですか？')) {
+    if (window.confirm('このページを削除してもよろしいですか？')) {
       onDeleteMeasure();
     }
   };
@@ -101,12 +101,12 @@ export const MeasureBar = ({
             transform: scale(0.95);
           }
         `}
-        title="現在の小節を削除"
+        title="現在のページを削除"
       >
         −
       </button>
 
-      {/* 前へボタン、小節数表示、次へボタンのグループ */}
+      {/* 前へボタン、ページ数表示、次へボタンのグループ */}
       <div
         css={css`
           display: flex;
@@ -145,12 +145,12 @@ export const MeasureBar = ({
               transform: scale(0.95);
             }
           `}
-          title="前の小節へ"
+          title="前のページへ"
         >
           &lt;
         </button>
 
-        {/* 小節数ラベルと再生アイコン */}
+        {/* ページ数ラベルと再生アイコン */}
         <div
           onClick={onOpenModal ? (e) => {
             e.preventDefault();
@@ -243,7 +243,7 @@ export const MeasureBar = ({
               transform: scale(0.95);
             }
           `}
-          title="次の小節へ"
+          title="次のページへ"
         >
           &gt;
         </button>
@@ -279,7 +279,7 @@ export const MeasureBar = ({
             transform: scale(0.95);
           }
         `}
-        title="小節を保存して新規作成"
+        title="ページを保存して新規作成"
       >
         +
       </button>
