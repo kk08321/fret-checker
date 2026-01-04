@@ -448,6 +448,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
 
           // 補助線を描画
       ctx.strokeStyle = '#000'; // 必ず黒色に設定
+      ctx.lineWidth = 1; // 補助線の太さを1に設定（五線譜と同じ太さ）
       ledgerLines.forEach((lineIndex) => {
         const ledgerY = topMargin + lineIndex * lineSpacing;
         // 補助線は音符3つ分の横幅（0.7倍に縮小）
