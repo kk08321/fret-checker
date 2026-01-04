@@ -31,7 +31,9 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
   const [playingMeasureIndex, setPlayingMeasureIndex] = useState<number | null>(null);
   const playbackTimeoutRef = useRef<number | null>(null);
   const metronomeIntervalRef = useRef<number | null>(null);
+  const scrollBackTimeoutRef = useRef<number | null>(null);
   const [bpm, setBpm] = useState(120);
+  const [bpmInput, setBpmInput] = useState<string>('120');
   
   // Canvasの幅を計算するための定数
   const baseMeasureWidth = 100; // 基準となるページ幅
@@ -244,7 +246,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
   };
 
   // 再生停止
-  const handleStop = () => {
+  const handleStop = (shouldScrollBack: boolean = false) => {
     setIsPlaying(false);
     setPlayingMeasureIndex(null);
     if (playbackTimeoutRef.current) {
@@ -255,13 +257,26 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       clearInterval(metronomeIntervalRef.current);
       metronomeIntervalRef.current = null;
     }
+    
+    // 再生完了後に選択中の音符にスクロールを戻す
+    if (shouldScrollBack) {
+      // 一拍（四分音符の長さ）待ってからスクロール
+      const quarterNoteDuration = 60 / bpm; // 四分音符の長さ（秒）
+      if (scrollBackTimeoutRef.current) {
+        clearTimeout(scrollBackTimeoutRef.current);
+      }
+      scrollBackTimeoutRef.current = window.setTimeout(() => {
+        scrollToMeasure(selectedMeasureIndex);
+        scrollBackTimeoutRef.current = null;
+      }, quarterNoteDuration * 1000);
+    }
   };
 
   // 指定されたページを再生し、次のページへの再生をスケジュール
   const playMeasure = (measureIndex: number) => {
     if (measureIndex >= measures.length) {
       // すべてのページを再生完了
-      handleStop();
+      handleStop(true); // 再生完了時はスクロールを戻す
       return;
     }
 
@@ -328,6 +343,9 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       }
       if (metronomeIntervalRef.current) {
         clearInterval(metronomeIntervalRef.current);
+      }
+      if (scrollBackTimeoutRef.current) {
+        clearTimeout(scrollBackTimeoutRef.current);
       }
     };
   }, []);
@@ -794,6 +812,8 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         `}
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* ヘッダー */}
         <div
@@ -1289,16 +1309,28 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               BPM:
             </label>
             <input
-              type="number"
-              min="40"
-              max="220"
-              value={bpm}
+              type="text"
+              inputMode="numeric"
+              value={bpmInput}
               onChange={(e) => {
+                const value = e.target.value;
+                // 空文字列または数字のみを許可
+                if (value === '' || /^\d+$/.test(value)) {
+                  setBpmInput(value);
+                }
+              }}
+              onBlur={(e) => {
                 const value = parseInt(e.target.value, 10);
                 if (!isNaN(value) && value >= 40 && value <= 220) {
                   setBpm(value);
+                  setBpmInput(value.toString());
+                } else {
+                  // 無効な値の場合は元の値に戻す
+                  setBpmInput(bpm.toString());
                 }
               }}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
               disabled={isPlaying}
               css={css`
                 width: 50px;
@@ -1309,6 +1341,9 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 text-align: center;
                 background-color: ${isPlaying ? '#f5f5f5' : '#fff'};
                 color: ${isPlaying ? '#999' : '#333'};
+                touch-action: manipulation;
+                -webkit-user-select: text;
+                user-select: text;
                 
                 &:focus {
                   outline: none;
@@ -1329,6 +1364,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
                 const value = parseInt(e.target.value, 10);
                 if (!isNaN(value) && value >= 40 && value <= 220) {
                   setBpm(value);
+                  setBpmInput(value.toString());
                 }
               }}
               disabled={isPlaying}
