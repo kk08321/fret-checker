@@ -362,7 +362,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     const dpr = window.devicePixelRatio || 1;
     const containerElement = containerRef.current;
     const containerWidth = containerElement ? containerElement.getBoundingClientRect().width : 800;
-    const canvasHeight = 200; // 高さを短くして一覧性を向上
+    const canvasHeight = 140; // 高さを0.7倍に縮小（200 * 0.7 = 140）
     // Canvasの幅はページ数に応じて計算（最小でもコンテナ幅）
     // 各ページの間隔を音価に応じて計算
     let totalWidth = leftMargin;
@@ -397,11 +397,11 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     // 楽譜の設定
     // SheetPageでは24本の線（五線譜5本＋補助線）が均等に配置されている
     // 各線の高さは4.16666%（100% / 24）
-    const topMargin = 10; // 上マージン（はみ出し防止）
+    const topMargin = 7; // 上マージン（はみ出し防止、0.7倍に縮小: 10 * 0.7 = 7）
     const totalLines = 24; // SheetPageと同じ24本の線
     const availableHeight = canvasHeight - topMargin; // マージンを除いた利用可能な高さ
     const lineSpacing = availableHeight / totalLines; // 各線の間隔
-    const noteSize = 22; // 音符のサイズ（20%縮小: 28 * 0.8 = 22.4 → 22）
+    const noteSize = 15.4; // 音符のサイズ（0.7倍に縮小: 22 * 0.7 = 15.4）
 
     // 五線を描画（7本目から11本目まで、つまりインデックス7-11）
     ctx.strokeStyle = '#000';
@@ -446,11 +446,11 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         if (lineIndex >= 22) ledgerLines.add(22);
       });
 
-      // 補助線を描画
+          // 補助線を描画
       ctx.strokeStyle = '#000'; // 必ず黒色に設定
       ledgerLines.forEach((lineIndex) => {
         const ledgerY = topMargin + lineIndex * lineSpacing;
-        // 補助線は音符3つ分の横幅（音符の中心から左右に約42pxずつ）
+        // 補助線は音符3つ分の横幅（0.7倍に縮小）
         const ledgerLength = noteSize * 2; // 音符3つ分の長さ
         const ledgerStartX = currentX + currentMeasureWidth / 2 - ledgerLength / 2;
         const ledgerEndX = currentX + currentMeasureWidth / 2 + ledgerLength / 2;
@@ -520,7 +520,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           
           // 各音符の左側に臨時記号を配置（Y位置に基づいて）
           accidentals.push({
-            x: noteX - 25, // 音符の左側
+            x: noteX - 17.5, // 音符の左側（0.7倍に縮小: 25 * 0.7 = 17.5）
             y: noteY,
             symbol,
           });
@@ -529,7 +529,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
 
         // 臨時記号を描画
         accidentals.forEach((accidental) => {
-          ctx.font = 'bold 28px serif';
+          ctx.font = 'bold 19.6px serif'; // 0.7倍に縮小: 28 * 0.7 = 19.6
           // 再生中のページの場合はオレンジ、選択中のページの場合は水色、それ以外は黒色
           ctx.fillStyle = isPlayingMeasure ? '#FF9800' : (isSelectedMeasure ? '#00BCD4' : '#000');
           ctx.textAlign = 'center';
@@ -602,7 +602,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           const dotY = restY; // 休符と同じ高さ
           ctx.fillStyle = restColor;
           ctx.beginPath();
-          ctx.arc(dotX, dotY, 3, 0, 2 * Math.PI);
+          ctx.arc(dotX, dotY, 2.1, 0, 2 * Math.PI); // 点のサイズも0.7倍に縮小: 3 * 0.7 = 2.1
           ctx.fill();
         }
         
@@ -685,32 +685,32 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
             const flagY = stemEndY;
             ctx.beginPath();
             if (stemDirection === 'down') {
-              // 下向きの縦線には上向きの旗
+              // 下向きの縦線には上向きの旗（0.7倍に縮小）
               ctx.moveTo(flagX, flagY);
-              ctx.quadraticCurveTo(flagX - 8, flagY - 10, flagX - 12, flagY - 15);
+              ctx.quadraticCurveTo(flagX - 5.6, flagY - 7, flagX - 8.4, flagY - 10.5); // 0.7倍: 8*0.7=5.6, 10*0.7=7, 12*0.7=8.4, 15*0.7=10.5
             } else {
-              // 上向きの縦線には下向きの旗
+              // 上向きの縦線には下向きの旗（0.7倍に縮小）
               ctx.moveTo(flagX, flagY);
-              ctx.quadraticCurveTo(flagX + 8, flagY + 10, flagX + 12, flagY + 15);
+              ctx.quadraticCurveTo(flagX + 5.6, flagY + 7, flagX + 8.4, flagY + 10.5);
             }
             ctx.stroke();
           } else if (noteValue === 'sixteenth') {
             const flagX = stemStartX;
             const flagY = stemEndY;
-            const flagSpacing = 12; // 旗の間隔
+            const flagSpacing = 8.4; // 旗の間隔（0.7倍に縮小: 12 * 0.7 = 8.4）
             ctx.beginPath();
             if (stemDirection === 'down') {
-              // 下向きの縦線には上向きの旗を2つ
+              // 下向きの縦線には上向きの旗を2つ（0.7倍に縮小）
               ctx.moveTo(flagX, flagY);
-              ctx.quadraticCurveTo(flagX - 8, flagY - 10, flagX - 12, flagY - 15);
+              ctx.quadraticCurveTo(flagX - 5.6, flagY - 7, flagX - 8.4, flagY - 10.5);
               ctx.moveTo(flagX, flagY - flagSpacing);
-              ctx.quadraticCurveTo(flagX - 8, flagY - flagSpacing - 10, flagX - 12, flagY - flagSpacing - 15);
+              ctx.quadraticCurveTo(flagX - 5.6, flagY - flagSpacing - 7, flagX - 8.4, flagY - flagSpacing - 10.5);
             } else {
-              // 上向きの縦線には下向きの旗を2つ
+              // 上向きの縦線には下向きの旗を2つ（0.7倍に縮小）
               ctx.moveTo(flagX, flagY);
-              ctx.quadraticCurveTo(flagX + 8, flagY + 10, flagX + 12, flagY + 15);
+              ctx.quadraticCurveTo(flagX + 5.6, flagY + 7, flagX + 8.4, flagY + 10.5);
               ctx.moveTo(flagX, flagY + flagSpacing);
-              ctx.quadraticCurveTo(flagX + 8, flagY + flagSpacing + 10, flagX + 12, flagY + flagSpacing + 15);
+              ctx.quadraticCurveTo(flagX + 5.6, flagY + flagSpacing + 7, flagX + 8.4, flagY + flagSpacing + 10.5);
             }
             ctx.stroke();
           }
@@ -719,9 +719,9 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           if (isTriplet && noteIndex === 0) {
             const tripletX = stemStartX;
             const tripletY = stemDirection === 'down' 
-              ? minNoteY - 20 // 下向きの場合は上側
-              : maxNoteY + 20; // 上向きの場合は下側
-            ctx.font = 'bold 16px serif';
+              ? minNoteY - 14 // 下向きの場合は上側（0.7倍に縮小: 20 * 0.7 = 14）
+              : maxNoteY + 14; // 上向きの場合は下側（0.7倍に縮小: 20 * 0.7 = 14）
+            ctx.font = 'bold 11.2px serif'; // 0.7倍に縮小: 16 * 0.7 = 11.2
             ctx.fillStyle = noteColor;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -737,11 +737,11 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           if (!isNaN(firstNoteNum)) {
             const firstLineIndex = 23 - firstNoteNum;
             const firstNoteY = topMargin + firstLineIndex * lineSpacing;
-            const dotX = noteX + noteSize / 2 + 8; // 音符の右側
+            const dotX = noteX + noteSize / 2 + 5.6; // 音符の右側（0.7倍に縮小: 8 * 0.7 = 5.6）
             const dotY = firstNoteY; // 最初の音符と同じ高さ
             ctx.fillStyle = isPlayingMeasure ? '#FF9800' : (isSelectedMeasure ? '#00BCD4' : '#000');
             ctx.beginPath();
-            ctx.arc(dotX, dotY, 3, 0, 2 * Math.PI);
+            ctx.arc(dotX, dotY, 2.1, 0, 2 * Math.PI); // 点のサイズも0.7倍に縮小: 3 * 0.7 = 2.1
             ctx.fill();
           }
         }
@@ -1271,7 +1271,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           <canvas
             ref={canvasRef}
             css={css`
-              height: 200px;
+              height: 140px;
               display: block;
               pointer-events: none;
               touch-action: none;
