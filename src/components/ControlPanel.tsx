@@ -375,9 +375,7 @@ function ControlPanel({ notes, controlWrapperRef, onClearSelection, onUndo, onSh
       <div css={[
         messageWrapper,
         css`
-          padding-bottom: ${isSafari 
-            ? `calc(170px + env(safe-area-inset-bottom, 0px))` 
-            : `60px`};
+          padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
           box-sizing: border-box;
         `
       ]}>

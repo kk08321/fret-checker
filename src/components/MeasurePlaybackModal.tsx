@@ -789,7 +789,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
           padding: 24px;
           width: 90%;
           max-width: 800px;
-          max-height: 90vh;
+          max-height: 90dvh;
           display: flex;
           flex-direction: column;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);

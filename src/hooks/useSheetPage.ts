@@ -47,7 +47,8 @@ export const useSheetPage = () => {
     if (pageWrapperRef.current && controlWrapperRef.current) {
       setSheetWrapperHeight(
         pageWrapperRef.current.getBoundingClientRect().height -
-          controlWrapperRef.current.getBoundingClientRect().height
+          controlWrapperRef.current.getBoundingClientRect().height - 
+          50 // MeasureBarの高さ分を引く
       );
     }
   }, [selectedNote]);
