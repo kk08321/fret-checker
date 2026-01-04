@@ -5,11 +5,15 @@ import { KEY_SIGNATURE_LIST, KeySignatureType } from "./utils/keySignature";
 import { useTuning } from "./contexts/TuningContext";
 import { TuningType } from "./types";
 import { useAudioSettings } from "./contexts/AudioSettingsContext";
+import { useDataPersistence } from "./contexts/DataPersistenceContext";
+import { useMeasure } from "./contexts/MeasureContext";
 
 export default function SettingsPage() {
   const { selectedKeySignature, setSelectedKeySignature } = useKeySignature();
   const { tuning, setTuning } = useTuning();
   const { audioPlayback, setAudioPlayback } = useAudioSettings();
+  const { dataPersistence, setDataPersistence } = useDataPersistence();
+  const { clearAllMeasures } = useMeasure();
 
   const handleKeySignatureChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -22,6 +26,17 @@ export default function SettingsPage() {
 
   const handleAudioPlaybackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAudioPlayback(e.target.checked ? 'enabled' : 'disabled');
+  };
+
+  const handleDataPersistenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDataPersistence(e.target.checked ? 'enabled' : 'disabled');
+  };
+
+  const handleClearInputData = () => {
+    if (window.confirm('入力した音符情報をすべて削除しますか？この操作は取り消せません。')) {
+      clearAllMeasures();
+      alert('入力内容をリセットしました。');
+    }
   };
 
   return (
@@ -298,6 +313,136 @@ export default function SettingsPage() {
               />
             </div>
           </label>
+        </div>
+      </div>
+
+      {/* 音符情報管理セクション */}
+      <div
+        css={css`
+          margin-bottom: 32px;
+        `}
+      >
+        <div
+          css={css`
+            background-color: #ffffff;
+            border-radius: 10px;
+            margin: 0 20px;
+            overflow: hidden;
+          `}
+        >
+          <label
+            htmlFor="dataPersistenceToggle"
+            css={css`
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 12px 16px;
+              font-size: 17px;
+              font-weight: 400;
+              color: #000;
+              cursor: pointer;
+              transition: background-color 0.1s ease;
+              border-bottom: 0.5px solid rgba(60, 60, 67, 0.29);
+              
+              &:active {
+                background-color: rgba(0, 0, 0, 0.05);
+              }
+            `}
+          >
+            <div
+              css={css`
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+              `}
+            >
+              <span>音符情報の保持</span>
+              <span
+                css={css`
+                  font-size: 13px;
+                  color: rgba(60, 60, 67, 0.6);
+                  margin-top: 2px;
+                `}
+              >
+                ブラウザを閉じても入力内容が保持されます
+              </span>
+            </div>
+            <div
+              css={css`
+                position: relative;
+                width: 51px;
+                height: 31px;
+                flex-shrink: 0;
+              `}
+            >
+              <input
+                type="checkbox"
+                id="dataPersistenceToggle"
+                checked={dataPersistence === 'enabled'}
+                onChange={handleDataPersistenceChange}
+                css={css`
+                  opacity: 0;
+                  width: 0;
+                  height: 0;
+                  position: absolute;
+                `}
+              />
+              <span
+                css={css`
+                  position: absolute;
+                  cursor: pointer;
+                  top: 0;
+                  left: 0;
+                  right: 0;
+                  bottom: 0;
+                  background-color: ${dataPersistence === 'enabled' ? '#34c759' : 'rgba(120, 120, 128, 0.16)'};
+                  transition: background-color 0.3s ease;
+                  border-radius: 15.5px;
+                  
+                  &:before {
+                    position: absolute;
+                    content: "";
+                    height: 27px;
+                    width: 27px;
+                    left: 2px;
+                    bottom: 2px;
+                    background-color: white;
+                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border-radius: 50%;
+                    transform: ${dataPersistence === 'enabled' ? 'translateX(20px)' : 'translateX(0)'};
+                    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
+                  }
+                `}
+              />
+            </div>
+          </label>
+          <button
+            type="button"
+            onClick={handleClearInputData}
+            disabled={dataPersistence === 'disabled'}
+            css={css`
+              width: 100%;
+              padding: 12px 16px;
+              font-size: 17px;
+              font-weight: 400;
+              color: ${dataPersistence === 'disabled' ? 'rgba(60, 60, 67, 0.3)' : '#ff3b30'};
+              background-color: transparent;
+              border: none;
+              text-align: left;
+              cursor: ${dataPersistence === 'disabled' ? 'not-allowed' : 'pointer'};
+              transition: background-color 0.1s ease;
+              
+              &:active:not(:disabled) {
+                background-color: rgba(0, 0, 0, 0.05);
+              }
+              
+              &:disabled {
+                opacity: 0.5;
+              }
+            `}
+          >
+            音符情報をリセット
+          </button>
         </div>
       </div>
     </div>

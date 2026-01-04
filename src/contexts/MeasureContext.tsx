@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { NoteValue, MeasureData } from "../types";
+import { useDataPersistence } from "./DataPersistenceContext";
 
 // 型定義を再エクスポート（後方互換性のため）
 export type { NoteValue, MeasureData };
@@ -19,23 +20,117 @@ interface MeasureContextType {
   updateCurrentMeasureNoteValue: (noteValue: NoteValue) => void; // 現在のページの音価を更新
   updateCurrentMeasureDotted: (isDotted: boolean) => void; // 現在のページの付点音符フラグを更新
   updateCurrentMeasureTriplet: (isTriplet: boolean) => void; // 現在のページの三連符フラグを更新
+  clearAllMeasures: () => void; // 全ページをクリア（localStorageも削除）
 }
 
 const MeasureContext = createContext<MeasureContextType | undefined>(undefined);
+
+// localStorageのキー名
+const STORAGE_KEY_MEASURES = "fret-checker-measures";
+const STORAGE_KEY_CURRENT_MEASURE_INDEX = "fret-checker-current-measure-index";
+
+/**
+ * localStorageからmeasuresを読み込む
+ */
+const loadMeasuresFromStorage = (): MeasureData[] => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_MEASURES);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // バリデーション: 配列で、各要素がMeasureDataの形式であることを確認
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((measure: any) => ({
+          notes: Array.isArray(measure.notes) ? measure.notes : [],
+          noteValue: measure.noteValue || 'quarter',
+          isDotted: measure.isDotted || false,
+          isTriplet: measure.isTriplet || false,
+        }));
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load measures from localStorage:', error);
+  }
+  // デフォルト値: 空のページを1つ
+  return [{ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }];
+};
+
+/**
+ * localStorageからcurrentMeasureIndexを読み込む
+ */
+const loadCurrentMeasureIndexFromStorage = (measuresLength: number): number => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_CURRENT_MEASURE_INDEX);
+    if (saved !== null) {
+      const index = parseInt(saved, 10);
+      // バリデーション: 有効なインデックス範囲内か確認
+      if (!isNaN(index) && index >= 0 && index < measuresLength) {
+        return index;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load currentMeasureIndex from localStorage:', error);
+  }
+  return 0;
+};
+
+/**
+ * localStorageにmeasuresを保存
+ */
+const saveMeasuresToStorage = (measures: MeasureData[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY_MEASURES, JSON.stringify(measures));
+  } catch (error) {
+    console.error('Failed to save measures to localStorage:', error);
+  }
+};
+
+/**
+ * localStorageにcurrentMeasureIndexを保存
+ */
+const saveCurrentMeasureIndexToStorage = (index: number) => {
+  try {
+    localStorage.setItem(STORAGE_KEY_CURRENT_MEASURE_INDEX, index.toString());
+  } catch (error) {
+    console.error('Failed to save currentMeasureIndex to localStorage:', error);
+  }
+};
+
+/**
+ * localStorageからmeasuresとcurrentMeasureIndexを削除
+ */
+const clearMeasuresFromStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEY_MEASURES);
+    localStorage.removeItem(STORAGE_KEY_CURRENT_MEASURE_INDEX);
+  } catch (error) {
+    console.error('Failed to clear measures from localStorage:', error);
+  }
+};
 
 /**
  * MeasureProviderコンポーネント
  * ページ情報をContextで管理し、SheetPageとFretboardPage間で共有する
  */
 export const MeasureProvider = ({ children }: { children: ReactNode }) => {
+  // データ保存設定を取得
+  const { dataPersistence } = useDataPersistence();
+  
   // 全ページの配列（各ページは音符の配列と音価を含む）
-  const [measures, setMeasures] = useState<MeasureData[]>([{ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }]);
+  // 初期化時にlocalStorageから読み込む（データ保存が有効な場合のみ）
+  // currentMeasureIndexの初期化にも使用するため、先に読み込む
+  const defaultMeasure: MeasureData = { notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false };
+  const initialMeasures = dataPersistence === "enabled" ? loadMeasuresFromStorage() : [defaultMeasure];
+  const initialCurrentMeasureIndex = dataPersistence === "enabled" ? loadCurrentMeasureIndexFromStorage(initialMeasures.length) : 0;
+  const [measures, setMeasures] = useState<MeasureData[]>(initialMeasures);
   // 現在編集中のページのインデックス
-  const [currentMeasureIndex, setCurrentMeasureIndex] = useState(0);
+  // 初期化時にlocalStorageから読み込む（measuresの長さを考慮）
+  const [currentMeasureIndex, setCurrentMeasureIndex] = useState(initialCurrentMeasureIndex);
   // ページ読み込み中フラグ（無限ループを防ぐため）
   const isLoadingMeasureRef = useRef(false);
   // currentMeasureIndexの最新値を保持するref（updateCurrentMeasureで使用）
-  const currentMeasureIndexRef = useRef(0);
+  const currentMeasureIndexRef = useRef(initialCurrentMeasureIndex);
+  // 初期化フラグ（初回のlocalStorage保存を防ぐため）
+  const isInitialMountRef = useRef(true);
 
   // currentMeasureIndexの変更をrefに反映
   // updateCurrentMeasure内で最新のインデックスを参照するため
@@ -44,7 +139,30 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
     // インデックス変更後は、isLoadingMeasureRefをfalseに戻す
     // これにより、次の更新からupdateCurrentMeasureが正常に動作する
     isLoadingMeasureRef.current = false;
-  }, [currentMeasureIndex]);
+    
+    // 初期化時は保存しない、データ保存が有効な場合のみ保存
+    if (!isInitialMountRef.current && dataPersistence === "enabled") {
+      saveCurrentMeasureIndexToStorage(currentMeasureIndex);
+    }
+  }, [currentMeasureIndex, dataPersistence]);
+
+  // measuresが変更されたときにlocalStorageに保存
+  useEffect(() => {
+    // 初期化時は保存しない、データ保存が有効な場合のみ保存
+    if (!isInitialMountRef.current && dataPersistence === "enabled") {
+      saveMeasuresToStorage(measures);
+    } else if (isInitialMountRef.current) {
+      // 初回マウント後はフラグをfalseに
+      isInitialMountRef.current = false;
+    }
+  }, [measures, dataPersistence]);
+
+  // データ保存設定が無効になったときにlocalStorageをクリア
+  useEffect(() => {
+    if (dataPersistence === "disabled") {
+      clearMeasuresFromStorage();
+    }
+  }, [dataPersistence]);
 
   /**
    * 現在のページの内容を更新
@@ -197,6 +315,17 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  /**
+   * 全ページをクリア（localStorageも削除）
+   * 設定画面から呼び出される
+   */
+  const clearAllMeasures = () => {
+    clearMeasuresFromStorage();
+    setMeasures([{ notes: [], noteValue: 'quarter', isDotted: false, isTriplet: false }]);
+    setCurrentMeasureIndex(0);
+    isLoadingMeasureRef.current = false;
+  };
+
   return (
     <MeasureContext.Provider
       value={{
@@ -210,6 +339,7 @@ export const MeasureProvider = ({ children }: { children: ReactNode }) => {
         updateCurrentMeasureNoteValue,
         updateCurrentMeasureDotted,
         updateCurrentMeasureTriplet,
+        clearAllMeasures,
       }}
     >
       {children}
