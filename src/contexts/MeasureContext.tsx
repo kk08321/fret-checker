@@ -1,19 +1,8 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
+import { NoteValue, MeasureData } from "../types";
 
-/**
- * 音価の型定義
- */
-export type NoteValue = 'whole' | 'half' | 'quarter' | 'eighth' | 'sixteenth';
-
-/**
- * ページ情報の型定義
- */
-export interface MeasureData {
-  notes: string[]; // 音符の配列
-  noteValue: NoteValue; // ページの音価（デフォルトは'quarter'）
-  isDotted?: boolean; // 付点音符フラグ（音価×1.5）
-  isTriplet?: boolean; // 三連符フラグ
-}
+// 型定義を再エクスポート（後方互換性のため）
+export type { NoteValue, MeasureData };
 
 /**
  * MeasureContextの型定義

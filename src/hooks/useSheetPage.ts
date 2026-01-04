@@ -8,10 +8,7 @@ import { useMeasure } from "../contexts/MeasureContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
 import { playChord } from "../utils/audio";
 
-interface Coordinates {
-  x: number;
-  y: number;
-}
+import { Coordinates } from "../types";
 
 export const useSheetPage = () => {
   const [touchCoordinates, setTouchCoordinates] = useState<Coordinates | null>(null);

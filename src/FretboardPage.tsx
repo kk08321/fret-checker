@@ -8,8 +8,7 @@ import { MeasureBar } from "./components/MeasureBar";
 import MeasurePlaybackModal from "./components/MeasurePlaybackModal";
 import { noteNumberToMidi, getGuitarPositions, getGuitarOpenStrings, midiToNoteName } from "./utils/midi";
 import { calculateFretHeights } from "./utils/fretboard";
-
-const NUM_FRETS = 20;
+import { NUM_FRETS, FRET_COLORS, FRETBOARD_LAYOUT, PEARL_INLAY_POSITIONS } from "./constants";
 
 /**
  * フレット番号からヒートマップ色を計算
@@ -23,21 +22,12 @@ const getFretColor = (fret: number): string => {
   
   // 序盤で黄色成分が早く増えるように、2.5乗関数を使用
   // これにより、フレットの物理的な幅の違いを視覚的に補正
-  const ratio = Math.pow(linearRatio, 0.45);
-  
-  // 緑色: rgb(34, 197, 94) - 見やすい緑
-  // 黄色: rgb(255, 220, 0) - 見やすい黄
-  const greenR = 34;
-  const greenG = 197;
-  const greenB = 94;
-  const yellowR = 255;
-  const yellowG = 220;
-  const yellowB = 0;
+  const ratio = Math.pow(linearRatio, FRET_COLORS.POWER_EXPONENT);
   
   // 非線形補間
-  const r = Math.round(greenR + (yellowR - greenR) * ratio);
-  const g = Math.round(greenG + (yellowG - greenG) * ratio);
-  const b = Math.round(greenB + (yellowB - greenB) * ratio);
+  const r = Math.round(FRET_COLORS.GREEN.r + (FRET_COLORS.YELLOW.r - FRET_COLORS.GREEN.r) * ratio);
+  const g = Math.round(FRET_COLORS.GREEN.g + (FRET_COLORS.YELLOW.g - FRET_COLORS.GREEN.g) * ratio);
+  const b = Math.round(FRET_COLORS.GREEN.b + (FRET_COLORS.YELLOW.b - FRET_COLORS.GREEN.b) * ratio);
   
   return `rgb(${r}, ${g}, ${b})`;
 };
@@ -173,11 +163,9 @@ function FretboardPage() {
         >
           {strings.map((stringNum, index) => {
             // フレット番号ヘッダーの左端から最初の弦の中心までの距離を計算
-            // ヘッダー幅(30px) + マージン(5px) + フレットボードのボーダー(3px) + 弦の中心位置(14px) = 52px
             // 各弦は28px間隔で並んでいるので、index * 28pxを追加
-            const baseOffset = 30 + 5 + 3 + 14; // 52px
-            const stringOffset = 28 * index;
-            const leftOffset = baseOffset + stringOffset;
+            const stringOffset = FRETBOARD_LAYOUT.STRING_SPACING * index;
+            const leftOffset = FRETBOARD_LAYOUT.BASE_OFFSET + stringOffset;
             return (
               <div
                 key={stringNum}
@@ -372,7 +360,7 @@ function FretboardPage() {
             };
             
             // フレットボードの幅（6弦 × 28px）
-            const fretboardWidth = strings.length * 28;
+            const fretboardWidth = strings.length * FRETBOARD_LAYOUT.STRING_SPACING;
             const centerX = fretboardWidth / 2;
             
             // パールインレイのスタイル
@@ -397,51 +385,44 @@ function FretboardPage() {
             
             return (
               <>
-                {/* 5フレット：中央に1つ */}
-                <div
-                  css={[
-                    pearlInlayStyle,
-                    css`
-                      left: ${centerX}px;
-                      top: ${getFretTopPosition(5) + fretHeights[5] / 2}px;
-                      transform: translate(-50%, -50%);
-                    `,
-                  ]}
-                />
-                
-                {/* 7フレット：中央に1つ */}
-                <div
-                  css={[
-                    pearlInlayStyle,
-                    css`
-                      left: ${centerX}px;
-                      top: ${getFretTopPosition(7) + fretHeights[7] / 2}px;
-                      transform: translate(-50%, -50%);
-                    `,
-                  ]}
-                />
-                
-                {/* 12フレット：左右に2つ */}
-                <div
-                  css={[
-                    pearlInlayStyle,
-                    css`
-                      left: ${centerX - 30}px;
-                      top: ${getFretTopPosition(12) + fretHeights[12] / 2}px;
-                      transform: translate(-50%, -50%);
-                    `,
-                  ]}
-                />
-                <div
-                  css={[
-                    pearlInlayStyle,
-                    css`
-                      left: ${centerX + 30}px;
-                      top: ${getFretTopPosition(12) + fretHeights[12] / 2}px;
-                      transform: translate(-50%, -50%);
-                    `,
-                  ]}
-                />
+                {PEARL_INLAY_POSITIONS.map((position, idx) => {
+                  if (position.count === 1) {
+                    return (
+                      <div
+                        key={`${position.fret}-${idx}`}
+                        css={[
+                          pearlInlayStyle,
+                          css`
+                            left: ${centerX}px;
+                            top: ${getFretTopPosition(position.fret) + fretHeights[position.fret] / 2}px;
+                            transform: translate(-50%, -50%);
+                          `,
+                        ]}
+                      />
+                    );
+                  } else {
+                    // 複数のパールインレイ（例：12フレット）
+                    return Array.from({ length: position.count }).map((_, i) => {
+                      const offset = position.offset || 0;
+                      const leftOffset = i === 0 
+                        ? centerX - offset 
+                        : centerX + offset;
+                      return (
+                        <div
+                          key={`${position.fret}-${i}`}
+                          css={[
+                            pearlInlayStyle,
+                            css`
+                              left: ${leftOffset}px;
+                              top: ${getFretTopPosition(position.fret) + fretHeights[position.fret] / 2}px;
+                              transform: translate(-50%, -50%);
+                            `,
+                          ]}
+                        />
+                      );
+                    });
+                  }
+                })}
               </>
             );
           })()}

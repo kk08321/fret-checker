@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import React from 'react';
 import { css } from '@emotion/react';
-import { NoteValue } from '../contexts/MeasureContext';
+import { NoteValue } from '../types';
 
 interface NoteIconProps {
   value: NoteValue;

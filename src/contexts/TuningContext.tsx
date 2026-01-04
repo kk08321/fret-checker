@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { getCookie, setCookie } from "../utils/cookie";
+import { TuningType } from "../types";
 
-export type TuningType = "normal" | "dropD";
+// 型定義を再エクスポート（後方互換性のため）
+export type { TuningType };
 
 interface TuningContextType {
   tuning: TuningType;

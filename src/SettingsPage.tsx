@@ -2,7 +2,8 @@
 import { css } from "@emotion/react";
 import { useKeySignature } from "./contexts/KeySignatureContext";
 import { KEY_SIGNATURE_LIST, KeySignatureType } from "./utils/keySignature";
-import { useTuning, TuningType } from "./contexts/TuningContext";
+import { useTuning } from "./contexts/TuningContext";
+import { TuningType } from "./types";
 import { useAudioSettings } from "./contexts/AudioSettingsContext";
 
 export default function SettingsPage() {

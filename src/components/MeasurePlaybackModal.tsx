@@ -1,10 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { useState, useEffect, useRef } from "react";
-import { useMeasure, NoteValue } from "../contexts/MeasureContext";
+import { useMeasure } from "../contexts/MeasureContext";
+import { NoteValue } from "../types";
 import { useKeySignature } from "../contexts/KeySignatureContext";
 import { KEY_SIGNATURES, getKeySignatureNoteNames, getNoteNameFromNoteNumber } from "../utils/keySignature";
 import { playChord } from "../utils/audio";
+import { CANVAS, MEASURE_SPACING, PLAYBACK, SHEET_PAGE } from "../constants";
 
 interface MeasurePlaybackModalProps {
   onClose: () => void;
@@ -32,38 +34,20 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
   const playbackTimeoutRef = useRef<number | null>(null);
   const metronomeIntervalRef = useRef<number | null>(null);
   const scrollBackTimeoutRef = useRef<number | null>(null);
-  const [bpm, setBpm] = useState(120);
-  const [bpmInput, setBpmInput] = useState<string>('120');
-  
-  // Canvasの幅を計算するための定数
-  const baseMeasureWidth = 100; // 基準となるページ幅
-  const leftMargin = 10; // ト音記号がないので左マージンを縮小
-  const rightMargin = 20;
+  const [bpm, setBpm] = useState<number>(PLAYBACK.DEFAULT_BPM);
+  const [bpmInput, setBpmInput] = useState<string>(PLAYBACK.DEFAULT_BPM.toString());
 
   // 音価に応じたページ間の間隔を計算する関数
   const getMeasureSpacing = (noteValue: NoteValue): number => {
-    switch (noteValue) {
-      case 'whole':
-        return 150; // 全音符の後は広く
-      case 'half':
-        return 120; // 二分音符の後はやや広く
-      case 'quarter':
-        return 100; // 四分音符の後は標準
-      case 'eighth':
-        return 80; // 八分音符の後はやや狭く
-      case 'sixteenth':
-        return 60; // 十六分音符の後は狭く
-      default:
-        return 100;
-    }
+    return MEASURE_SPACING[noteValue] || MEASURE_SPACING.quarter;
   };
 
   // 指定されたページのX位置を計算する関数
   const getMeasureXPosition = (measureIndex: number): number => {
-    let x = leftMargin;
+    let x = CANVAS.LEFT_MARGIN;
     for (let i = 0; i < measureIndex; i++) {
       if (i === 0) {
-        x += baseMeasureWidth;
+        x += CANVAS.BASE_MEASURE_WIDTH;
       } else {
         const prevNoteValue = measures[i - 1].noteValue;
         x += getMeasureSpacing(prevNoteValue);
@@ -71,7 +55,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     }
     // 現在のページの中央位置を返す
     const currentMeasureWidth = measureIndex === 0 
-      ? baseMeasureWidth 
+      ? CANVAS.BASE_MEASURE_WIDTH 
       : getMeasureSpacing(measures[measureIndex - 1].noteValue);
     return x + currentMeasureWidth / 2;
   };
@@ -203,12 +187,12 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
       const gain = audioContext.createGain();
       
       osc.type = 'sine';
-      osc.frequency.value = 1000; // 1000Hzのクリック音
+      osc.frequency.value = PLAYBACK.METRONOME_FREQUENCY;
       
-      // 短い音（0.05秒）
-      const duration = 0.05;
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+      // 短い音
+      const duration = PLAYBACK.METRONOME_DURATION;
+      gain.gain.setValueAtTime(PLAYBACK.METRONOME_GAIN_START, now);
+      gain.gain.exponentialRampToValueAtTime(PLAYBACK.METRONOME_GAIN_END, now + duration);
       
       osc.connect(gain);
       gain.connect(audioContext.destination);
@@ -306,8 +290,8 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     const container = containerRef.current;
     const measureX = getMeasureXPosition(measureIndex);
     
-    // スケールファクターを考慮（0.7倍）
-    const scaleFactor = 0.7;
+    // スケールファクターを考慮
+    const scaleFactor = CANVAS.SCALE_FACTOR;
     const scaledMeasureX = measureX * scaleFactor;
     
     // コンテナの幅とスクロール位置を取得
@@ -362,21 +346,21 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     const dpr = window.devicePixelRatio || 1;
     const containerElement = containerRef.current;
     const containerWidth = containerElement ? containerElement.getBoundingClientRect().width : 800;
-    const canvasHeight = 140; // 高さを0.7倍に縮小（200 * 0.7 = 140）
+    const canvasHeight = CANVAS.HEIGHT;
     // Canvasの幅はページ数に応じて計算（最小でもコンテナ幅）
     // 各ページの間隔を音価に応じて計算
-    let totalWidth = leftMargin;
+    let totalWidth = CANVAS.LEFT_MARGIN;
     measures.forEach((_, index) => {
       if (index === 0) {
         // 最初のページは基準幅を使用
-        totalWidth += baseMeasureWidth;
+        totalWidth += CANVAS.BASE_MEASURE_WIDTH;
       } else {
         // 前のページの音価に応じた間隔を使用
         const prevNoteValue = measures[index - 1].noteValue;
         totalWidth += getMeasureSpacing(prevNoteValue);
       }
     });
-    totalWidth += rightMargin;
+    totalWidth += CANVAS.RIGHT_MARGIN;
     const calculatedCanvasWidth = Math.max(containerWidth, totalWidth);
     setCanvasWidth(calculatedCanvasWidth);
     canvas.width = calculatedCanvasWidth * dpr;
@@ -389,34 +373,33 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
     ctx.fillStyle = '#FCFCFC';
     ctx.fillRect(0, 0, calculatedCanvasWidth, canvasHeight);
 
-    // 楽譜全体を縮小表示（0.7倍）
-    const scaleFactor = 0.7;
+    // 楽譜全体を縮小表示
+    const scaleFactor = CANVAS.SCALE_FACTOR;
     ctx.save();
     ctx.scale(scaleFactor, scaleFactor);
 
     // 楽譜の設定
     // SheetPageでは24本の線（五線譜5本＋補助線）が均等に配置されている
-    // 各線の高さは4.16666%（100% / 24）
-    const topMargin = 7; // 上マージン（はみ出し防止、0.7倍に縮小: 10 * 0.7 = 7）
-    const totalLines = 24; // SheetPageと同じ24本の線
+    const topMargin = CANVAS.TOP_MARGIN;
+    const totalLines = SHEET_PAGE.TOTAL_LINES;
     const availableHeight = canvasHeight - topMargin; // マージンを除いた利用可能な高さ
     const lineSpacing = availableHeight / totalLines; // 各線の間隔
-    const noteSize = 15.4; // 音符のサイズ（0.7倍に縮小: 22 * 0.7 = 15.4）
+    const noteSize = CANVAS.NOTE_SIZE;
 
-    // 五線を描画（7本目から11本目まで、つまりインデックス7-11）
+    // 五線を描画
     ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 5; i++) {
-      const lineIndex = 8 + i * 2;
+    ctx.lineWidth = CANVAS.LINE_WIDTH;
+    for (let i = 0; i < SHEET_PAGE.STAFF_LINES; i++) {
+      const lineIndex = SHEET_PAGE.STAFF_START_INDEX + i * 2;
       const y = topMargin + lineIndex * lineSpacing;
       ctx.beginPath();
-      ctx.moveTo(leftMargin, y);
-      ctx.lineTo(calculatedCanvasWidth - rightMargin, y);
+      ctx.moveTo(CANVAS.LEFT_MARGIN, y);
+      ctx.lineTo(calculatedCanvasWidth - CANVAS.RIGHT_MARGIN, y);
       ctx.stroke();
     }
 
     // 各ページの音符を描画
-    let currentX = leftMargin;
+    let currentX = CANVAS.LEFT_MARGIN;
     measures.forEach((measure, measureIndex) => {
       const measureNotes = measure.notes;
       const noteValue = measure.noteValue;
@@ -425,7 +408,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
 
       // このページの幅を決定（最初のページは基準幅、それ以外は前のページの音価に応じた間隔）
       const currentMeasureWidth = measureIndex === 0 
-        ? baseMeasureWidth 
+        ? CANVAS.BASE_MEASURE_WIDTH 
         : getMeasureSpacing(measures[measureIndex - 1].noteValue);
 
       // 補助線を描画するために、このページの音符の位置を取得
@@ -820,20 +803,11 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
         <div
           css={css`
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             margin-bottom: 20px;
           `}
         >
-          <h2
-            css={css`
-              margin: 0;
-              font-size: 20px;
-              font-weight: bold;
-            `}
-          >
-            楽譜プレイヤー
-          </h2>
           <button
             onClick={onClose}
             css={css`
@@ -1322,7 +1296,7 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
               }}
               onBlur={(e) => {
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value >= 40 && value <= 220) {
+                if (!isNaN(value) && value >= PLAYBACK.MIN_BPM && value <= PLAYBACK.MAX_BPM) {
                   setBpm(value);
                   setBpmInput(value.toString());
                 } else {
@@ -1358,12 +1332,12 @@ const MeasurePlaybackModal = ({ onClose }: MeasurePlaybackModalProps) => {
             />
             <input
               type="range"
-              min="40"
-              max="220"
+              min={PLAYBACK.MIN_BPM}
+              max={PLAYBACK.MAX_BPM}
               value={bpm}
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value >= 40 && value <= 220) {
+                if (!isNaN(value) && value >= PLAYBACK.MIN_BPM && value <= PLAYBACK.MAX_BPM) {
                   setBpm(value);
                   setBpmInput(value.toString());
                 }
