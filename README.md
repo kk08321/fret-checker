@@ -1,15 +1,17 @@
 # Fret Checker
 
-ギターの五線譜からフレットボード上の押弦箇所を表示するWebアプリケーションです。
-簡単な譜面の再生機能も備えており、音取り・練習のお供に最適です。
+ギターの五線譜からフレットボード上の押弦箇所を表示するWebアプリケーションです。  
+簡単な譜面の再生機能も備えており、音取り・練習のお供に最適です。  
 主にiPhone/iPadからWebアプリモードで使用する想定です。
 
 ## アクセス方法
 
 Azure Static Web Appsで配信しています：
+
 https://proud-plant-070750e00.1.azurestaticapps.net/sheet
 
 iPhone/iPadから上記URLにアクセスし、ブラウザ上でそのまま動作しますが、下記手順にてWebアプリモードで起動することでより快適に利用できます。
+
 https://support.apple.com/ja-jp/guide/iphone/iphea86e5236/ios
 
 ## 機能
