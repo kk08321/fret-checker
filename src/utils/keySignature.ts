@@ -95,13 +95,13 @@ export const KEY_SIGNATURES: Record<KeySignatureType, KeySignature> = {
   'B major': {
     type: 'B major',
     displayName: 'B major(#*5)',
-    sharps: [15, 12, 16, 13, 11], // F#, C#, G#, D#, A#
+    sharps: [15, 12, 16, 13, 17], // F#, C#, G#, D#, A#
     flats: [],
   },
   'F# major': {
     type: 'F# major',
     displayName: 'F♯ major(#*6)',
-    sharps: [15, 12, 16, 13, 11, 14], // F#, C#, G#, D#, A#, E#
+    sharps: [15, 12, 16, 13, 17, 14], // F#, C#, G#, D#, A#, E#
     flats: [],
   },
   'D minor': {
